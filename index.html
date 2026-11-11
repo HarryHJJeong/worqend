@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+KR:wght@400;500;700;900&display=swap">
 <!--
   WORQEND
-  - 첫 화면은 홍보 랜딩(신청서 포함). '참가자 로그인' 또는 주소 끝 #login 으로 워크스페이스 로그인 · project-based business English simulation (single file)
+  - 첫 화면은 홍보 랜딩(신청서 포함). '로그인' 버튼 또는 주소 끝 #login 으로 워크스페이스 로그인 · project-based business English simulation (single file)
   - 기기를 판별해 PC 화면 또는 모바일 화면 중 하나만 불러옵니다(반응형 아님). 강제: ?view=pc / ?view=mobile
   - 설정(GS_URL · Director 계정)은 스크립트 맨 위 "1. Config"
   - 이메일 평가와 NPC 답장은 규칙 기반이며 외부 AI API를 호출하지 않습니다.
@@ -161,6 +161,7 @@ body.dragging:after{content:"⬆  Drop the project Excel file to import";positio
 .xfer-box{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;background:#f6f8f5;border-radius:12px;padding:12px;margin:10px 0}.xfer-box small{display:block;font-size:10px;font-weight:800;letter-spacing:.1em;color:var(--green)}.xfer-box span{display:block;font-size:11px;color:var(--sub)}.xfer-arrow{font-weight:800;color:var(--green);text-align:center}
 .mini-wallets{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-top:8px}.mini-wallets div{background:#f6f8f5;border-radius:10px;padding:8px 10px}.mini-wallets small{display:block;font-size:10.5px;color:var(--sub)}.mini-wallets b{display:block;font-size:14px}
 td.num{text-align:right;white-space:nowrap}td.num.neg{color:var(--danger)}
+.lp-switch{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:15px;cursor:pointer}.lp-switch input{width:20px;height:20px}.lp-switch .tiny{flex-basis:100%}
 .crm-stats{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:14px}.crm-stat{border:1px solid var(--line);background:#fff;border-radius:14px;padding:12px;text-align:left;cursor:pointer;font:inherit}.crm-stat b{display:block;font-size:22px}.crm-stat span{font-size:12px;color:var(--sub)}.crm-stat.on{background:#293e36;color:#fff;border-color:#293e36}.crm-stat.on span{color:#d6e2da}
 .crm-search,.crm-tools select{border:1px solid var(--line);border-radius:10px;padding:9px 12px;font:inherit;font-size:14px;background:#fff;color:inherit}.crm-btns{display:flex;gap:6px;flex-wrap:nowrap}
 .crm-tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:6px 0 4px}.crm-search{flex:1;min-width:200px}.crm-tools select{width:auto}
@@ -349,6 +350,7 @@ table.mini{min-width:0}table.mini td{font-size:12px;padding:6px 4px}.matrix td,.
 .mini-wallets{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-top:8px}.mini-wallets div{background:#f6f8f5;border-radius:10px;padding:8px 10px}.mini-wallets small{display:block;font-size:10.5px;color:var(--sub)}.mini-wallets b{display:block;font-size:14px}
 td.num{text-align:right;white-space:nowrap}td.num.neg{color:var(--danger)}
 .wnums b{font-size:12px}.wallet-avail strong{font-size:19px;white-space:nowrap}.xfer-box{grid-template-columns:1fr}.xfer-arrow{text-align:left}
+.lp-switch{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:15px;cursor:pointer}.lp-switch input{width:20px;height:20px}.lp-switch .tiny{flex-basis:100%}
 .crm-stats{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:14px}.crm-stat{border:1px solid var(--line);background:#fff;border-radius:14px;padding:12px;text-align:left;cursor:pointer;font:inherit}.crm-stat b{display:block;font-size:22px}.crm-stat span{font-size:12px;color:var(--sub)}.crm-stat.on{background:#293e36;color:#fff;border-color:#293e36}.crm-stat.on span{color:#d6e2da}
 .crm-search,.crm-tools select{border:1px solid var(--line);border-radius:10px;padding:9px 12px;font:inherit;font-size:14px;background:#fff;color:inherit}.crm-btns{display:flex;gap:6px;flex-wrap:nowrap}
 .crm-tools .crm-search{flex:1 1 100%}.crm-tools select{flex:1}
@@ -734,6 +736,72 @@ async function updateApplication(id, patch) {
   return r;
 }
 
+/* ── Landing settings (Director가 관리 화면에서 고치는 랜딩 문구) ── */
+const LP_CFG_KEY = 'worqend_lp_cfg_v1';
+const LP_DEFAULTS = {
+  recruiting: true, season: 'Season 01', cta: 'Season 01 신청하기', closedCta: '다음 시즌 알림 받기',
+  dates: '', schedule: '', meetingLen: '60–75분, 최종 90분', place: '', teams: '', teamSize: '8', fee: '', deadline: '', noticeDate: '',
+  contactEmail: 'harry@worqend.com', business: '', privacyUrl: '',
+  closedMessage: '이번 시즌 모집이 마감되었습니다. 이메일을 남겨 주시면 다음 시즌 모집이 열릴 때 가장 먼저 알려드릴게요.',
+  faqs: [{"q": "영어를 얼마나 잘해야 참여할 수 있나요?", "a": "기본적인 이메일을 읽고 쓸 수 있으면 됩니다. 역할마다 요구되는 영어 수준이 다르고, 신청서의 수준을 보고 역할을 배정합니다. 실무자 역할은 중급, PM과 Coordinator는 회의를 이끌 수 있는 수준을 권장합니다."}, {"q": "거래처는 실제 사람인가요?", "a": "팀원은 모두 실제 참가자이고, 공급업체·물류·광고대행사 같은 거래처는 시나리오에 맞춰 자동으로 답장하는 가상 거래처입니다. 정해진 조건 안에서만 답하기 때문에 협상 결과는 여러분의 이메일과 결정에 따라 달라집니다."}, {"q": "평일에는 얼마나 시간을 써야 하나요?", "a": "역할과 주차에 따라 다르지만, 이메일 몇 통과 산출물 하나 정도입니다."}, {"q": "회의에 빠지면 어떻게 되나요?", "a": "결석하더라도 회의록과 결정 기록이 모두 남기 때문에 다음 주 업무는 이어서 할 수 있습니다."}, {"q": "수료 후에 무엇을 받나요?", "a": "역할, 수행한 미션, 주요 이메일과 결정, 회의 참여 기록, Director 평가가 담긴 역할 기반 성과 리포트를 받습니다. 교육용 리포트이며 공인 영어 성적은 아닙니다."}]
+};
+const LP_FIELDS = ['recruiting', 'season', 'cta', 'closedCta', 'dates', 'schedule', 'meetingLen', 'place', 'teams', 'teamSize', 'fee', 'deadline', 'noticeDate', 'contactEmail', 'business', 'privacyUrl', 'closedMessage', 'faqs'];
+function cleanLpConfig(c) {
+  const out = {}, t = (v, n) => String(v ?? '').trim().slice(0, n);
+  for (const k of LP_FIELDS) {
+    if (c[k] === undefined) continue;
+    if (k === 'recruiting') out[k] = !!c[k];
+    else if (k === 'faqs') out[k] = (Array.isArray(c[k]) ? c[k] : []).map(x => ({ q: t(x.q, 200), a: t(x.a, 2000) })).filter(x => x.q).slice(0, 20);
+    else out[k] = t(c[k], k === 'closedMessage' || k === 'business' ? 400 : 160);
+  }
+  if (out.privacyUrl && !/^https?:\/\//i.test(out.privacyUrl)) out.privacyUrl = '';
+  return out;
+}
+let lpCfgCache = null;
+function lpConfig() {
+  if (!lpCfgCache) { try { lpCfgCache = JSON.parse(localStorage.getItem(LP_CFG_KEY) || 'null'); } catch (_) { lpCfgCache = null; } }
+  const c = { ...LP_DEFAULTS, ...(lpCfgCache || {}) };
+  if (!c.faqs || !c.faqs.length) c.faqs = LP_DEFAULTS.faqs;
+  if (!c.season) c.season = LP_DEFAULTS.season;
+  if (!c.cta) c.cta = LP_DEFAULTS.cta;
+  if (!c.closedCta) c.closedCta = LP_DEFAULTS.closedCta;
+  if (!c.contactEmail) c.contactEmail = LP_DEFAULTS.contactEmail;
+  if (!c.teamSize) c.teamSize = LP_DEFAULTS.teamSize;
+  return c;
+}
+function setLpConfigCache(c) { lpCfgCache = c || {}; try { localStorage.setItem(LP_CFG_KEY, JSON.stringify(lpCfgCache)); } catch (_) {} }
+/** 서버(또는 로컬)에서 최신 랜딩 설정을 받아옵니다. 실패해도 조용히 기존 값 유지. */
+async function fetchLpConfig() {
+  let c = null;
+  if (Store.mode === 'remote') c = await RemoteStore.call({ action: 'landing.get' });
+  else c = (LocalStore._read().landing || null);
+  const before = JSON.stringify(lpCfgCache || {}), next = c ? cleanLpConfig(c) : {};
+  setLpConfigCache(next);
+  return before !== JSON.stringify(next);
+}
+async function saveLpConfig(c) {
+  if (!isDirector()) throw Error('Director만 수정할 수 있습니다.');
+  const clean = cleanLpConfig(c);
+  if (Store.mode === 'remote') await RemoteStore.call({ action: 'landing.save', key: DIRECTOR.password, config: clean });
+  else { const d = LocalStore._read(); d.landing = clean; localStorage.setItem(LOCAL_KEY, JSON.stringify(d)); }
+  setLpConfigCache(clean);
+  return clean;
+}
+async function submitInterest(f) {
+  const name = String(f.name || '').trim().slice(0, 60), email = String(f.email || '').trim().toLowerCase().slice(0, 120);
+  if (!name) throw Error('이름을 입력해 주세요.');
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw Error('이메일 주소를 확인해 주세요.');
+  if (!f.consent) throw Error('개인정보 수집·이용에 동의해 주세요.');
+  if (Store.mode === 'remote') return RemoteStore.call({ action: 'interest', name, email });
+  const d = LocalStore._read(), list = (d.applications = d.applications || []), now = Date.now();
+  const old = list.find(x => x.email === email && !x.deleted);
+  const act = { id: uid(), ts: now, type: 'apply', text: '다음 시즌 알림 신청' };
+  if (old) { old.tags = [...new Set([...(old.tags || []), '다음 시즌 알림'])]; old.activities = [...(old.activities || []), act]; }
+  else list.push({ id: uid(), created: now, source: 'interest', stage: 'Lead', status: '', name, email, phone: '', tags: ['다음 시즌 알림'], activities: [act], note: '' });
+  localStorage.setItem(LOCAL_KEY, JSON.stringify(d));
+  return { ok: true };
+}
+
 /* ── 6c. CRM (신청자 + 직접 추가한 잠재 고객) ── */
 const CRM_STAGES = [['Lead', '리드'], ['Applied', '신청'], ['Accepted', '합격'], ['Participant', '참가 중'], ['Alumni', '수료'], ['On hold', '보류']];
 const CRM_STAGE_KEYS = CRM_STAGES.map(s => s[0]);
@@ -774,7 +842,7 @@ async function deleteContact(id) {
 function contactsCsv(rows) {
   const q = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
   const head = ['이름', '이메일', '연락처', '회사/직무', '영어 레벨', '단계', '태그', '출처', '등록일', '다음 연락일', '신청 상태', '희망 역할', '가능 시간', '최근 활동', '메모'];
-  const body = rows.map(a => { const last = (a.activities || []).slice(-1)[0]; return [a.name, a.email, a.phone, a.company || a.job, a.level, stageLabel(stageOf(a)), (a.tags || []).join(', '), a.source === 'manual' ? '직접 추가' : '랜딩 신청', new Date(a.created).toISOString().slice(0, 10), a.followUp || '', a.status || '', (a.roles || []).join(', '), (a.times || []).join(', '), last ? `${new Date(last.ts).toISOString().slice(0, 10)} ${last.text}` : '', a.note || ''].map(q).join(','); });
+  const body = rows.map(a => { const last = (a.activities || []).slice(-1)[0]; return [a.name, a.email, a.phone, a.company || a.job, a.level, stageLabel(stageOf(a)), (a.tags || []).join(', '), a.source === 'manual' ? '직접 추가' : a.source === 'interest' ? '다음 시즌 알림' : '랜딩 신청', new Date(a.created).toISOString().slice(0, 10), a.followUp || '', a.status || '', (a.roles || []).join(', '), (a.times || []).join(', '), last ? `${new Date(last.ts).toISOString().slice(0, 10)} ${last.text}` : '', a.note || ''].map(q).join(','); });
   return '\ufeff' + [head.map(q).join(','), ...body].join('\r\n');
 }
 
@@ -3061,13 +3129,13 @@ function landingPCHtml(v) {
       <nav style="display: flex; gap: 28px; flex-wrap: wrap; font-size: 14px; font-weight: 600">
         <a href="#how" style="text-decoration: none; color: #4b524e">진행 방식</a>
         <a href="#roles" style="text-decoration: none; color: #4b524e">역할</a>
-        <a href="#season" style="text-decoration: none; color: #4b524e">Season 01</a>
+        <a href="#season" style="text-decoration: none; color: #4b524e">${esc(v.cfg.season)}</a>
         <a href="#platform" style="text-decoration: none; color: #4b524e">플랫폼</a>
         <a href="#faq" style="text-decoration: none; color: #4b524e">FAQ</a>
       </nav>
       <div style="display: flex; gap: 10px; align-items: center">
-        <a href="#login" data-act="lp-login" style="text-decoration: none; font-size: 14px; font-weight: 600; color: #4b524e; padding: 10px 14px">참가자 로그인</a>
-        <a href="#apply" style="text-decoration: none; background: #293e36; color: #ffffff; font-size: 14px; font-weight: 700; padding: 12px 20px; border-radius: 12px">Season 01 신청하기</a>
+        <a href="#login" data-act="lp-login" style="text-decoration: none; font-size: 14px; font-weight: 600; color: #4b524e; padding: 10px 14px">로그인</a>
+        <a href="#apply" style="text-decoration: none; background: #293e36; color: #ffffff; font-size: 14px; font-weight: 700; padding: 12px 20px; border-radius: 12px">${esc(v.cta)}</a>
       </div>
     </div>
   </header>
@@ -3079,14 +3147,14 @@ function landingPCHtml(v) {
       <div style="display: flex; flex-direction: column; gap: 28px">
         <span style="align-self: flex-start; background: #3e5b4c; color: #dff0cf; font-size: 12px; font-weight: 800; letter-spacing: 0.12em; padding: 8px 12px; border-radius: 999px">PROJECT-BASED BUSINESS ENGLISH · WEEKEND CLUB</span>
         <h1 style="margin: 0; font-size: 76px; line-height: 1.02; letter-spacing: -0.065em; font-weight: 900">Good weekends.<br>Great possibilities.</h1>
-        <p style="margin: 0; font-size: 19px; line-height: 1.75; color: #d6e3da; max-width: 520px">주말마다 진짜 회사처럼 일합니다. 8명이 한 팀이 되어 한 브랜드의 신제품을 기획하고, 영어로 회의하고, 협상하고, 결정합니다. 수업이 아니라 프로젝트입니다.</p>
+        <p style="margin: 0; font-size: 19px; line-height: 1.75; color: #d6e3da; max-width: 520px">주말마다 진짜 회사처럼 일합니다. ${esc(v.cfg.teamSize)}명이 한 팀이 되어 한 브랜드의 신제품을 기획하고, 영어로 회의하고, 협상하고, 결정합니다. 수업이 아니라 프로젝트입니다.</p>
         <div style="display: flex; gap: 12px; flex-wrap: wrap">
-          <a href="#apply" style="text-decoration: none; background: #c7e48b; color: #1f2f28; font-weight: 800; font-size: 16px; padding: 17px 26px; border-radius: 14px">Season 01 신청하기 →</a>
+          <a href="#apply" style="text-decoration: none; background: #c7e48b; color: #1f2f28; font-weight: 800; font-size: 16px; padding: 17px 26px; border-radius: 14px">${esc(v.cta)} →</a>
           <a href="#how" style="text-decoration: none; border: 1px solid #6f8b7c; color: #ffffff; font-weight: 700; font-size: 16px; padding: 16px 24px; border-radius: 14px">어떻게 진행되나요?</a>
         </div>
         <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; border-top: 1px solid #456153; padding-top: 22px; margin-top: 8px">
           <div><div style="font-size: 30px; font-weight: 900; letter-spacing: -0.04em">8주</div><div style="font-size: 13px; color: #b9cdc1; margin-top: 4px">한 시즌</div></div>
-          <div><div style="font-size: 30px; font-weight: 900; letter-spacing: -0.04em">8명</div><div style="font-size: 13px; color: #b9cdc1; margin-top: 4px">한 팀</div></div>
+          <div><div style="font-size: 30px; font-weight: 900; letter-spacing: -0.04em">${esc(v.cfg.teamSize)}명</div><div style="font-size: 13px; color: #b9cdc1; margin-top: 4px">한 팀</div></div>
           <div><div style="font-size: 30px; font-weight: 900; letter-spacing: -0.04em">75분</div><div style="font-size: 13px; color: #b9cdc1; margin-top: 4px">주말 회의</div></div>
           <div><div style="font-size: 30px; font-weight: 900; letter-spacing: -0.04em">100%</div><div style="font-size: 13px; color: #b9cdc1; margin-top: 4px">영어로 업무</div></div>
         </div>
@@ -3177,7 +3245,7 @@ function landingPCHtml(v) {
     <p style="margin: 14px 0 0; font-size: 16px; line-height: 1.7; color: #545b57; max-width: 680px">모든 요청과 보고는 Executive Coordinator를 거쳐 PM에게 올라갑니다. PM은 최종 결정을 내리고, Director는 팀 밖에서 시나리오와 평가를 운영합니다.</p>
     <div style="margin-top: 40px; background: #293e36; color: #ffffff; border-radius: 18px; padding: 18px 24px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap">
       <div><div style="font-size: 11px; font-weight: 800; letter-spacing: 0.12em; color: #b9cdc1">DIRECTOR · 외부 운영자</div><div style="font-size: 17px; font-weight: 700; margin-top: 4px">시나리오 이벤트 발송 · 주차 운영 · 최종 평가</div></div>
-      <span style="font-size: 13px; color: #d6e3da">참가자 8명에 포함되지 않습니다</span>
+      <span style="font-size: 13px; color: #d6e3da">참가자 ${esc(v.cfg.teamSize)}명에 포함되지 않습니다</span>
     </div>
     <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-top: 14px">
       ${v.roles.map((r, $index) => `
@@ -3196,7 +3264,7 @@ function landingPCHtml(v) {
     <div style="max-width: 1240px; margin: 0 auto; padding: 96px 40px">
       <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 56px; align-items: start">
         <div style="display: flex; flex-direction: column; gap: 18px">
-          <div style="font-size: 12px; font-weight: 800; letter-spacing: 0.14em; color: #455d50">SEASON 01 · MORROW</div>
+          <div style="font-size: 12px; font-weight: 800; letter-spacing: 0.14em; color: #455d50">${esc(v.cfg.season.toUpperCase())} · MORROW</div>
           <h2 style="margin: 0; font-size: 46px; line-height: 1.2; letter-spacing: -0.045em; font-weight: 900">정체된 브랜드의<br>신제품 텀블러를 출시하라</h2>
           <p style="margin: 0; font-size: 16px; line-height: 1.8; color: #545b57">라이프스타일 브랜드 Morrow의 매출이 세 분기째 제자리입니다. 팀은 8주 안에 고객을 정하고, 디자인과 공급업체를 고르고, 가격과 채널을 결정해 가상 출시까지 마쳐야 합니다. 출시 뒤에는 두 번의 판매 결과가 돌아옵니다.</p>
           <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 6px">
@@ -3255,15 +3323,15 @@ function landingPCHtml(v) {
   <section id="apply" style="max-width: 1240px; margin: 0 auto; padding: 96px 40px 40px">
     <div style="display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 40px; align-items: start">
       <div style="display: flex; flex-direction: column; gap: 16px">
-        <div style="font-size: 12px; font-weight: 800; letter-spacing: 0.14em; color: #455d50">SEASON 01 · APPLY</div>
+        <div style="font-size: 12px; font-weight: 800; letter-spacing: 0.14em; color: #455d50">${esc(v.cfg.season.toUpperCase())} · APPLY</div>
         <h2 style="margin: 0; font-size: 46px; line-height: 1.2; letter-spacing: -0.045em; font-weight: 900">이번 시즌에<br>합류하세요</h2>
         <dl style="margin: 8px 0 0; display: grid; gap: 10px">
-          <div style="background: #ffffff; border: 1px solid #eae6dd; border-radius: 14px; padding: 14px 18px; display: flex; justify-content: space-between; gap: 12px"><dt style="color: #6b716d; font-size: 14px">기간</dt><dd style="margin: 0; font-weight: 700; font-size: 14px">8주 · [시작일 – 종료일]</dd></div>
-          <div style="background: #ffffff; border: 1px solid #eae6dd; border-radius: 14px; padding: 14px 18px; display: flex; justify-content: space-between; gap: 12px"><dt style="color: #6b716d; font-size: 14px">주말 회의</dt><dd style="margin: 0; font-weight: 700; font-size: 14px">[요일·시간] · 60–75분, 최종 90분</dd></div>
-          <div style="background: #ffffff; border: 1px solid #eae6dd; border-radius: 14px; padding: 14px 18px; display: flex; justify-content: space-between; gap: 12px"><dt style="color: #6b716d; font-size: 14px">장소</dt><dd style="margin: 0; font-weight: 700; font-size: 14px">[오프라인 장소 / 온라인]</dd></div>
-          <div style="background: #ffffff; border: 1px solid #eae6dd; border-radius: 14px; padding: 14px 18px; display: flex; justify-content: space-between; gap: 12px"><dt style="color: #6b716d; font-size: 14px">정원</dt><dd style="margin: 0; font-weight: 700; font-size: 14px">팀당 8명 · [모집 팀 수]</dd></div>
-          <div style="background: #ffffff; border: 1px solid #eae6dd; border-radius: 14px; padding: 14px 18px; display: flex; justify-content: space-between; gap: 12px"><dt style="color: #6b716d; font-size: 14px">참가비</dt><dd style="margin: 0; font-weight: 700; font-size: 14px">[참가비]</dd></div>
-          <div style="background: #ffffff; border: 1px solid #eae6dd; border-radius: 14px; padding: 14px 18px; display: flex; justify-content: space-between; gap: 12px"><dt style="color: #6b716d; font-size: 14px">모집 마감</dt><dd style="margin: 0; font-weight: 700; font-size: 14px">[마감일]</dd></div>
+          <div style="background: #ffffff; border: 1px solid #eae6dd; border-radius: 14px; padding: 14px 18px; display: flex; justify-content: space-between; gap: 12px"><dt style="color: #6b716d; font-size: 14px">기간</dt><dd style="margin: 0; font-weight: 700; font-size: 14px">8주 · ${esc(v.f('dates'))}</dd></div>
+          <div style="background: #ffffff; border: 1px solid #eae6dd; border-radius: 14px; padding: 14px 18px; display: flex; justify-content: space-between; gap: 12px"><dt style="color: #6b716d; font-size: 14px">주말 회의</dt><dd style="margin: 0; font-weight: 700; font-size: 14px">${esc(v.f('schedule'))} · ${esc(v.f('meetingLen'))}</dd></div>
+          <div style="background: #ffffff; border: 1px solid #eae6dd; border-radius: 14px; padding: 14px 18px; display: flex; justify-content: space-between; gap: 12px"><dt style="color: #6b716d; font-size: 14px">장소</dt><dd style="margin: 0; font-weight: 700; font-size: 14px">${esc(v.f('place'))}</dd></div>
+          <div style="background: #ffffff; border: 1px solid #eae6dd; border-radius: 14px; padding: 14px 18px; display: flex; justify-content: space-between; gap: 12px"><dt style="color: #6b716d; font-size: 14px">정원</dt><dd style="margin: 0; font-weight: 700; font-size: 14px">팀당 ${esc(v.cfg.teamSize)}명 · ${esc(v.f('teams'))}</dd></div>
+          <div style="background: #ffffff; border: 1px solid #eae6dd; border-radius: 14px; padding: 14px 18px; display: flex; justify-content: space-between; gap: 12px"><dt style="color: #6b716d; font-size: 14px">참가비</dt><dd style="margin: 0; font-weight: 700; font-size: 14px">${esc(v.f('fee'))}</dd></div>
+          <div style="background: #ffffff; border: 1px solid #eae6dd; border-radius: 14px; padding: 14px 18px; display: flex; justify-content: space-between; gap: 12px"><dt style="color: #6b716d; font-size: 14px">모집 마감</dt><dd style="margin: 0; font-weight: 700; font-size: 14px">${esc(v.f('deadline'))}</dd></div>
         </dl>
         <p style="margin: 4px 0 0; font-size: 13px; line-height: 1.7; color: #6b716d">신청서를 바탕으로 영어 수준과 희망 역할을 고려해 팀과 역할을 배정합니다. 배정 결과와 로그인 정보는 이메일로 안내드립니다.</p>
       </div>
@@ -3303,16 +3371,16 @@ function landingPCHtml(v) {
               </div>
             </fieldset>
             <label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 700; color: #4b524e">지원 동기와 이번 시즌에서 해보고 싶은 것<textarea name="motivation" rows="4" placeholder="영어로 회의를 이끌어 보고 싶어요." style="border: 1px solid #dbe3dd; border-radius: 12px; padding: 13px 14px; font-weight: 400; background: #ffffff; resize: vertical"></textarea></label>
-            <label style="display: flex; gap: 10px; align-items: flex-start; font-size: 13px; line-height: 1.6; color: #545b57"><input type="checkbox" name="consent" value="yes" style="margin-top: 3px"> 신청 및 팀 배정 안내를 위한 개인정보 수집·이용에 동의합니다. </label>
+            <label style="display: flex; gap: 10px; align-items: flex-start; font-size: 13px; line-height: 1.6; color: #545b57"><input type="checkbox" name="consent" value="yes" style="margin-top: 3px"> 신청 및 팀 배정 안내를 위한 개인정보 수집·이용에 동의합니다.${v.cfg.privacyUrl ? ` <a href="${esc(v.cfg.privacyUrl)}" target="_blank" rel="noopener">개인정보 처리방침</a>` : ''}</label>
             <div data-lp-error style="color: #a13d32; font-size: 13px; min-height: 16px"></div>
-<button type="submit" style="background: #293e36; color: #ffffff; border: 0; border-radius: 14px; padding: 17px; font-size: 16px; font-weight: 800; cursor: pointer">Season 01 신청하기</button>
+<button type="submit" style="background: #293e36; color: #ffffff; border: 0; border-radius: 14px; padding: 17px; font-size: 16px; font-weight: 800; cursor: pointer">${esc(v.cta)}</button>
           </form>
         </div>
         <div id="lpDone" hidden>
           <div style="display: flex; flex-direction: column; gap: 14px; align-items: flex-start; padding: 24px 0">
             <div aria-hidden="true" style="width: 56px; height: 56px; border-radius: 16px; background: #d9ebc6; color: #365e2b; display: grid; place-items: center; font-size: 26px; font-weight: 900">✓</div>
             <h3 style="margin: 0; font-size: 26px; letter-spacing: -0.03em">신청이 접수되었습니다</h3>
-            <p style="margin: 0; font-size: 15px; line-height: 1.75; color: #545b57">팀·역할 배정 결과와 워크스페이스 로그인 정보는 빠른 시일 내에 이메일로 보내드립니다.</p>
+            <p style="margin: 0; font-size: 15px; line-height: 1.75; color: #545b57">팀·역할 배정 결과와 워크스페이스 로그인 정보는 ${v.cfg.noticeDate ? esc(v.cfg.noticeDate) + '까지' : '빠른 시일 내에'} 이메일로 보내드립니다.</p>
             <button type="button" data-act="lp-reset" style="background: #ffffff; border: 1px solid #dbe3dd; border-radius: 12px; padding: 12px 16px; font-weight: 700; cursor: pointer">신청서 다시 보기</button>
           </div>
         </div>
@@ -3338,12 +3406,12 @@ function landingPCHtml(v) {
   <section style="background: #293e36; color: #ffffff">
     <div style="max-width: 1240px; margin: 0 auto; padding: 72px 40px; display: flex; justify-content: space-between; align-items: center; gap: 24px; flex-wrap: wrap">
       <h2 style="margin: 0; font-size: 40px; letter-spacing: -0.045em; font-weight: 900; line-height: 1.2">이번 주말부터,<br>영어로 일하는 팀에 합류하세요.</h2>
-      <a href="#apply" style="text-decoration: none; background: #c7e48b; color: #1f2f28; font-weight: 800; font-size: 17px; padding: 18px 28px; border-radius: 14px">Season 01 신청하기 →</a>
+      <a href="#apply" style="text-decoration: none; background: #c7e48b; color: #1f2f28; font-weight: 800; font-size: 17px; padding: 18px 28px; border-radius: 14px">${esc(v.cta)} →</a>
     </div>
     <div style="border-top: 1px solid #3e5b4c">
       <div style="max-width: 1240px; margin: 0 auto; padding: 26px 40px; display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; font-size: 13px; color: #b9cdc1">
         <span><b style="color: #ffffff; font-weight: 900; letter-spacing: -0.06em; font-size: 16px">worqend.</b> · Project-based business English weekend club</span>
-        <span>문의 harry@worqend.com · [사업자 정보]</span>
+        <span>문의 ${esc(v.cfg.contactEmail)}${v.cfg.business ? ' · ' + esc(v.cfg.business) : ''}</span>
       </div>
     </div>
   </section>
@@ -3358,7 +3426,7 @@ function landingMobileHtml(v) {
     <div style="padding: 14px 18px; display: flex; align-items: center; justify-content: space-between">
       <a href="#m-top" style="text-decoration: none; color: #293e36; font-size: 23px; font-weight: 900; letter-spacing: -0.075em">worqend<span style="color: #8fb36d">.</span></a>
       <div style="display: flex; gap: 8px; align-items: center">
-        <a href="#m-apply" style="text-decoration: none; background: #293e36; color: #ffffff; font-size: 13px; font-weight: 700; padding: 11px 14px; border-radius: 12px">신청하기</a>
+        <a href="#m-apply" style="text-decoration: none; background: #293e36; color: #ffffff; font-size: 13px; font-weight: 700; padding: 11px 14px; border-radius: 12px">${v.cfg.recruiting ? '신청하기' : '알림 받기'}</a>
         <button type="button" data-act="lp-menu" aria-label="메뉴 열기" aria-expanded="false" style="width: 44px; height: 44px; border-radius: 12px; border: 1px solid #eae6dd; background: #ffffff; display: grid; place-items: center; cursor: pointer; padding: 0">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#293e36" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"></path></svg>
         </button>
@@ -3367,9 +3435,9 @@ function landingMobileHtml(v) {
     <nav id="lpMenu" hidden style="display: flex; flex-direction: column; padding: 4px 18px 16px; border-top: 1px solid #eae6dd">
         <a href="#m-how" data-act="lp-nav" data-target="m-how" style="text-decoration: none; color: #252b29; font-weight: 700; padding: 14px 2px; border-bottom: 1px solid #f0ede6">진행 방식</a>
         <a href="#m-roles" data-act="lp-nav" data-target="m-roles" style="text-decoration: none; color: #252b29; font-weight: 700; padding: 14px 2px; border-bottom: 1px solid #f0ede6">역할</a>
-        <a href="#m-season" data-act="lp-nav" data-target="m-season" style="text-decoration: none; color: #252b29; font-weight: 700; padding: 14px 2px; border-bottom: 1px solid #f0ede6">Season 01</a>
+        <a href="#m-season" data-act="lp-nav" data-target="m-season" style="text-decoration: none; color: #252b29; font-weight: 700; padding: 14px 2px; border-bottom: 1px solid #f0ede6">${esc(v.cfg.season)}</a>
         <a href="#m-faq" data-act="lp-nav" data-target="m-faq" style="text-decoration: none; color: #252b29; font-weight: 700; padding: 14px 2px; border-bottom: 1px solid #f0ede6">FAQ</a>
-        <a href="#login" data-act="lp-login" style="text-decoration: none; color: #455d50; font-weight: 700; padding: 14px 2px">참가자 로그인 →</a>
+        <a href="#login" data-act="lp-login" style="text-decoration: none; color: #455d50; font-weight: 700; padding: 14px 2px">로그인 →</a>
       </nav>
   </header>
 
@@ -3379,11 +3447,11 @@ function landingMobileHtml(v) {
     <div style="position: relative; display: flex; flex-direction: column; gap: 20px">
       <span style="align-self: flex-start; background: #3e5b4c; color: #dff0cf; font-size: 10.5px; font-weight: 800; letter-spacing: 0.1em; padding: 7px 10px; border-radius: 999px">PROJECT-BASED BUSINESS ENGLISH</span>
       <h1 style="margin: 0; font-size: 44px; line-height: 1.04; letter-spacing: -0.065em; font-weight: 900">Good weekends.<br>Great possibilities.</h1>
-      <p style="margin: 0; font-size: 16px; line-height: 1.75; color: #d6e3da">주말마다 진짜 회사처럼 일합니다. 8명이 한 팀이 되어 신제품을 기획하고, 영어로 회의하고, 협상하고, 결정합니다.</p>
-      <a href="#m-apply" style="text-decoration: none; text-align: center; background: #c7e48b; color: #1f2f28; font-weight: 800; font-size: 16px; padding: 17px; border-radius: 14px">Season 01 신청하기 →</a>
+      <p style="margin: 0; font-size: 16px; line-height: 1.75; color: #d6e3da">주말마다 진짜 회사처럼 일합니다. ${esc(v.cfg.teamSize)}명이 한 팀이 되어 신제품을 기획하고, 영어로 회의하고, 협상하고, 결정합니다.</p>
+      <a href="#m-apply" style="text-decoration: none; text-align: center; background: #c7e48b; color: #1f2f28; font-weight: 800; font-size: 16px; padding: 17px; border-radius: 14px">${esc(v.cta)} →</a>
       <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 6px">
         <div style="background: #35503f; border-radius: 14px; padding: 14px"><div style="font-size: 24px; font-weight: 900; letter-spacing: -0.04em">8주</div><div style="font-size: 12px; color: #b9cdc1; margin-top: 2px">한 시즌</div></div>
-        <div style="background: #35503f; border-radius: 14px; padding: 14px"><div style="font-size: 24px; font-weight: 900; letter-spacing: -0.04em">8명</div><div style="font-size: 12px; color: #b9cdc1; margin-top: 2px">한 팀</div></div>
+        <div style="background: #35503f; border-radius: 14px; padding: 14px"><div style="font-size: 24px; font-weight: 900; letter-spacing: -0.04em">${esc(v.cfg.teamSize)}명</div><div style="font-size: 12px; color: #b9cdc1; margin-top: 2px">한 팀</div></div>
         <div style="background: #35503f; border-radius: 14px; padding: 14px"><div style="font-size: 24px; font-weight: 900; letter-spacing: -0.04em">75분</div><div style="font-size: 12px; color: #b9cdc1; margin-top: 2px">주말 회의</div></div>
         <div style="background: #35503f; border-radius: 14px; padding: 14px"><div style="font-size: 24px; font-weight: 900; letter-spacing: -0.04em">100%</div><div style="font-size: 12px; color: #b9cdc1; margin-top: 2px">영어로 업무</div></div>
       </div>
@@ -3446,7 +3514,7 @@ function landingMobileHtml(v) {
 
   
   <section id="m-season" style="margin-top: 64px; background: #f0f4eb; border-top: 1px solid #e0e8d8; border-bottom: 1px solid #e0e8d8; padding: 52px 22px">
-    <div style="font-size: 11px; font-weight: 800; letter-spacing: 0.14em; color: #455d50">SEASON 01 · MORROW</div>
+    <div style="font-size: 11px; font-weight: 800; letter-spacing: 0.14em; color: #455d50">${esc(v.cfg.season.toUpperCase())} · MORROW</div>
     <h2 style="margin: 12px 0 12px; font-size: 29px; line-height: 1.25; letter-spacing: -0.045em; font-weight: 900">정체된 브랜드의 신제품 텀블러를 출시하라</h2>
     <p style="margin: 0; font-size: 14.5px; line-height: 1.75; color: #545b57">8주 안에 고객을 정하고, 디자인과 공급업체를 고르고, 가격과 채널을 결정해 가상 출시까지 마칩니다.</p>
     <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 18px 0">
@@ -3492,15 +3560,15 @@ function landingMobileHtml(v) {
 
   
   <section id="m-apply" style="padding: 64px 22px 0">
-    <div style="font-size: 11px; font-weight: 800; letter-spacing: 0.14em; color: #455d50">SEASON 01 · APPLY</div>
+    <div style="font-size: 11px; font-weight: 800; letter-spacing: 0.14em; color: #455d50">${esc(v.cfg.season.toUpperCase())} · APPLY</div>
     <h2 style="margin: 12px 0 16px; font-size: 29px; line-height: 1.25; letter-spacing: -0.045em; font-weight: 900">이번 시즌에 합류하세요</h2>
     <dl style="margin: 0 0 18px; background: #ffffff; border: 1px solid #eae6dd; border-radius: 16px; overflow: hidden">
-      <div style="display: flex; justify-content: space-between; gap: 10px; padding: 13px 16px; border-bottom: 1px solid #f0ede6"><dt style="color: #6b716d; font-size: 13.5px">기간</dt><dd style="margin: 0; font-weight: 700; font-size: 13.5px">8주 · [시작일 – 종료일]</dd></div>
-      <div style="display: flex; justify-content: space-between; gap: 10px; padding: 13px 16px; border-bottom: 1px solid #f0ede6"><dt style="color: #6b716d; font-size: 13.5px">주말 회의</dt><dd style="margin: 0; font-weight: 700; font-size: 13.5px">[요일·시간] · 60–75분</dd></div>
-      <div style="display: flex; justify-content: space-between; gap: 10px; padding: 13px 16px; border-bottom: 1px solid #f0ede6"><dt style="color: #6b716d; font-size: 13.5px">장소</dt><dd style="margin: 0; font-weight: 700; font-size: 13.5px">[장소 / 온라인]</dd></div>
-      <div style="display: flex; justify-content: space-between; gap: 10px; padding: 13px 16px; border-bottom: 1px solid #f0ede6"><dt style="color: #6b716d; font-size: 13.5px">정원</dt><dd style="margin: 0; font-weight: 700; font-size: 13.5px">팀당 8명 · [팀 수]</dd></div>
-      <div style="display: flex; justify-content: space-between; gap: 10px; padding: 13px 16px; border-bottom: 1px solid #f0ede6"><dt style="color: #6b716d; font-size: 13.5px">참가비</dt><dd style="margin: 0; font-weight: 700; font-size: 13.5px">[참가비]</dd></div>
-      <div style="display: flex; justify-content: space-between; gap: 10px; padding: 13px 16px"><dt style="color: #6b716d; font-size: 13.5px">모집 마감</dt><dd style="margin: 0; font-weight: 700; font-size: 13.5px">[마감일]</dd></div>
+      <div style="display: flex; justify-content: space-between; gap: 10px; padding: 13px 16px; border-bottom: 1px solid #f0ede6"><dt style="color: #6b716d; font-size: 13.5px">기간</dt><dd style="margin: 0; font-weight: 700; font-size: 13.5px">8주 · ${esc(v.f('dates'))}</dd></div>
+      <div style="display: flex; justify-content: space-between; gap: 10px; padding: 13px 16px; border-bottom: 1px solid #f0ede6"><dt style="color: #6b716d; font-size: 13.5px">주말 회의</dt><dd style="margin: 0; font-weight: 700; font-size: 13.5px">${esc(v.f('schedule'))} · ${esc(v.f('meetingLen'))}</dd></div>
+      <div style="display: flex; justify-content: space-between; gap: 10px; padding: 13px 16px; border-bottom: 1px solid #f0ede6"><dt style="color: #6b716d; font-size: 13.5px">장소</dt><dd style="margin: 0; font-weight: 700; font-size: 13.5px">${esc(v.f('place'))}</dd></div>
+      <div style="display: flex; justify-content: space-between; gap: 10px; padding: 13px 16px; border-bottom: 1px solid #f0ede6"><dt style="color: #6b716d; font-size: 13.5px">정원</dt><dd style="margin: 0; font-weight: 700; font-size: 13.5px">팀당 ${esc(v.cfg.teamSize)}명 · ${esc(v.f('teams'))}</dd></div>
+      <div style="display: flex; justify-content: space-between; gap: 10px; padding: 13px 16px; border-bottom: 1px solid #f0ede6"><dt style="color: #6b716d; font-size: 13.5px">참가비</dt><dd style="margin: 0; font-weight: 700; font-size: 13.5px">${esc(v.f('fee'))}</dd></div>
+      <div style="display: flex; justify-content: space-between; gap: 10px; padding: 13px 16px"><dt style="color: #6b716d; font-size: 13.5px">모집 마감</dt><dd style="margin: 0; font-weight: 700; font-size: 13.5px">${esc(v.f('deadline'))}</dd></div>
     </dl>
     <div style="background: #ffffff; border: 1px solid #eae6dd; border-radius: 20px; padding: 20px">
       <div id="lpFormWrap">
@@ -3535,16 +3603,16 @@ function landingMobileHtml(v) {
             </div>
           </fieldset>
           <label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 700; color: #4b524e">지원 동기<textarea name="motivation" rows="4" placeholder="영어로 회의를 이끌어 보고 싶어요." style="border: 1px solid #dbe3dd; border-radius: 12px; padding: 13px; font-size: 16px; font-weight: 400; background: #ffffff; resize: vertical"></textarea></label>
-          <label style="display: flex; gap: 10px; align-items: flex-start; font-size: 13px; line-height: 1.6; color: #545b57"><input type="checkbox" name="consent" value="yes" style="margin-top: 3px"> 신청 및 팀 배정 안내를 위한 개인정보 수집·이용에 동의합니다. </label>
+          <label style="display: flex; gap: 10px; align-items: flex-start; font-size: 13px; line-height: 1.6; color: #545b57"><input type="checkbox" name="consent" value="yes" style="margin-top: 3px"> 신청 및 팀 배정 안내를 위한 개인정보 수집·이용에 동의합니다.${v.cfg.privacyUrl ? ` <a href="${esc(v.cfg.privacyUrl)}" target="_blank" rel="noopener">개인정보 처리방침</a>` : ''}</label>
           <div data-lp-error style="color: #a13d32; font-size: 13px; min-height: 16px"></div>
-<button type="submit" style="background: #293e36; color: #ffffff; border: 0; border-radius: 14px; padding: 17px; font-size: 16px; font-weight: 800; cursor: pointer">Season 01 신청하기</button>
+<button type="submit" style="background: #293e36; color: #ffffff; border: 0; border-radius: 14px; padding: 17px; font-size: 16px; font-weight: 800; cursor: pointer">${esc(v.cta)}</button>
         </form>
       </div>
       <div id="lpDone" hidden>
         <div style="display: flex; flex-direction: column; gap: 12px; padding: 12px 0">
           <div aria-hidden="true" style="width: 52px; height: 52px; border-radius: 16px; background: #d9ebc6; color: #365e2b; display: grid; place-items: center; font-size: 24px; font-weight: 900">✓</div>
           <h3 style="margin: 0; font-size: 22px; letter-spacing: -0.03em">신청이 접수되었습니다</h3>
-          <p style="margin: 0; font-size: 14.5px; line-height: 1.75; color: #545b57">팀·역할 배정 결과와 로그인 정보는 빠른 시일 내에 이메일로 보내드립니다.</p>
+          <p style="margin: 0; font-size: 14.5px; line-height: 1.75; color: #545b57">팀·역할 배정 결과와 로그인 정보는 ${v.cfg.noticeDate ? esc(v.cfg.noticeDate) + '까지' : '빠른 시일 내에'} 이메일로 보내드립니다.</p>
           <button type="button" data-act="lp-reset" style="align-self: flex-start; background: #ffffff; border: 1px solid #dbe3dd; border-radius: 12px; padding: 12px 16px; font-weight: 700; cursor: pointer; min-height: 44px">신청서 다시 보기</button>
         </div>
       </div>
@@ -3569,14 +3637,14 @@ function landingMobileHtml(v) {
   <footer style="margin-top: 64px; background: #293e36; color: #b9cdc1; padding: 36px 22px 120px; font-size: 13px; line-height: 1.8">
     <div style="color: #ffffff; font-size: 24px; font-weight: 900; letter-spacing: -0.07em">worqend<span style="color: #c7e48b">.</span></div>
     <p style="margin: 8px 0 0">Project-based business English weekend club</p>
-    <p style="margin: 4px 0 0">문의 harry@worqend.com · [사업자 정보]</p>
-    <p style="margin: 14px 0 0"><a href="#login" data-act="lp-login" style="color: #ffffff; font-weight: 700; text-decoration: none">참가자 로그인 →</a></p>
+    <p style="margin: 4px 0 0">문의 ${esc(v.cfg.contactEmail)}${v.cfg.business ? ' · ' + esc(v.cfg.business) : ''}</p>
+    <p style="margin: 14px 0 0"><a href="#login" data-act="lp-login" style="color: #ffffff; font-weight: 700; text-decoration: none">로그인 →</a></p>
   </footer>
 
   
   <div style="position: sticky; bottom: 0; z-index: 6; background: rgba(250,248,243,0.96); border-top: 1px solid #eae6dd; padding: 12px 18px 18px; display: flex; gap: 10px; align-items: center">
-    <div style="flex: 1; min-width: 0"><div style="font-size: 11px; color: #6b716d; font-weight: 700">SEASON 01 · 모집 중</div><div style="font-size: 14px; font-weight: 800">팀당 8명 · [마감일]</div></div>
-    <a href="#m-apply" style="text-decoration: none; background: #293e36; color: #ffffff; font-weight: 800; font-size: 15px; padding: 15px 20px; border-radius: 14px">신청하기</a>
+    <div style="flex: 1; min-width: 0"><div style="font-size: 11px; color: #6b716d; font-weight: 700">${esc(v.cfg.season.toUpperCase())} · ${v.cfg.recruiting ? '모집 중' : '모집 마감'}</div><div style="font-size: 14px; font-weight: 800">팀당 ${esc(v.cfg.teamSize)}명 · ${esc(v.f('deadline'))}</div></div>
+    <a href="#m-apply" style="text-decoration: none; background: #293e36; color: #ffffff; font-weight: 800; font-size: 15px; padding: 15px 20px; border-radius: 14px">${v.cfg.recruiting ? '신청하기' : '알림 받기'}</a>
   </div>
 </div>`;
 }
@@ -3592,9 +3660,12 @@ function landingData(st) {
       ['수료 후에 무엇을 받나요?', '역할, 수행한 미션, 주요 이메일과 결정, 회의 참여 기록, Director 평가가 담긴 역할 기반 성과 리포트를 받습니다. 교육용 리포트이며 공인 영어 성적은 아닙니다.']
     ];
 
-  const faqs = faqData.map(([q, a], i) => ({ q, a, open: st.open === i, expanded: st.open === i ? 'true' : 'false', sign: st.open === i ? '−' : '+' }));
+  const cfg = lpConfig();
+  const fd = (cfg.faqs && cfg.faqs.length ? cfg.faqs.map(x => [x.q, x.a]) : faqData);
+  const faqs = fd.map(([q, a], i) => ({ q, a, open: st.open === i, expanded: st.open === i ? 'true' : 'false', sign: st.open === i ? '−' : '+' }));
   const rolePicks = LP_ROLES.map(label => { const on = st.picks.includes(label); return { label, pressed: on ? 'true' : 'false', border: on ? '#293e36' : '#dbe3dd', bg: on ? '#293e36' : '#ffffff', fg: on ? '#ffffff' : '#3d4441' }; });
   return {
+    cfg, cta: cfg.recruiting ? cfg.cta : cfg.closedCta, f: k => cfg[k] || '추후 안내',
     faqs, rolePicks,
       steps: [
         { n: '1', when: 'WEEK 0', title: '팀과 역할 배정', body: '신청서를 바탕으로 8명이 한 팀이 되고, 각자 회사 안의 한 역할을 맡습니다.' },
@@ -4188,7 +4259,7 @@ function pageMore() {
   return `${card(`<div class="me-card"><div class="avatar big">${esc(initials(me.name))}</div><div><b>${esc(me.name)}</b><div class="tiny muted">${esc(roleLabel())} · ${esc(me.email)}</div>${isDirector() ? `<select data-change="project" class="select-inline">${allProjects().map(p => `<option value="${esc(p.id)}" ${p.id === currentProjectId() ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}</select>` : `<div class="tiny muted">${esc(project()?.name || '')}</div>`}</div></div>`)}
   <div class="list">${['wallet', 'timeline', 'deliverables', 'directory', 'report'].filter(vis).map(k => item(k, PAGES[k].ico, PAGES[k].label, PAGES[k].title)).join('')}</div>
   ${vis('inbox') || vis('pm') ? `${sectionTitle('Leadership')}<div class="list">${['inbox', 'pm'].filter(vis).map(k => item(k, PAGES[k].ico, PAGES[k].label, PAGES[k].title)).join('')}</div>` : ''}
-  ${isDirector() ? `${sectionTitle('Director')}<div class="list">${['director', 'applicants', 'crm', 'projects', 'scenario', 'accounts'].map(k => item(k, PAGES[k].ico, PAGES[k].label, PAGES[k].title)).join('')}</div>` : ''}
+  ${isDirector() ? `${sectionTitle('Director')}<div class="list">${['director', 'applicants', 'crm', 'lpsettings', 'projects', 'scenario', 'accounts'].map(k => item(k, PAGES[k].ico, PAGES[k].label, PAGES[k].title)).join('')}</div>` : ''}
   <div class="list">${listRow({ title: 'PC 화면으로 보기', sub: 'Desktop workspace', avatar: '▭', act: 'switch-view', data: { view: 'pc' }, right: '<span class="chev">›</span>' })}${listRow({ title: 'Sign out', sub: Store.mode === 'local' ? 'Local test mode' : 'Shared workspace', avatar: '⎋', act: 'logout', cls: 'danger-row' })}</div>`;
 }
 
@@ -4205,7 +4276,7 @@ async function loadApplicants(force) {
 }
 function pageApplicants() {
   if (!ui.apps && !ui.appsError) { loadApplicants(); return notice('신청자 목록을 불러오는 중…'); }
-  const all = (ui.apps || []).filter(a => a.source !== 'manual'), f = ui.appFilter || 'All';
+  const all = (ui.apps || []).filter(a => a.source !== 'manual' && a.source !== 'interest'), f = ui.appFilter || 'All';
   const counts = Object.fromEntries(APP_STATUSES.map(st => [st, all.filter(a => a.status === st).length]));
   const rows = all.filter(a => f === 'All' || a.status === f);
   const tabs = ['All', ...APP_STATUSES].map(st => `<button type="button" class="btn small ${f === st ? 'primary' : ''}" data-act="app-filter" data-f="${st}">${st}${st === 'All' ? ` ${all.length}` : ` ${counts[st]}`}</button>`).join('');
@@ -4317,7 +4388,7 @@ function openContact(id) {
   const a = id ? (ui.apps || []).find(x => x.id === id) : null;
   const v = a || { name: '', email: '', phone: '', company: '', job: '', level: '', stage: 'Lead', tags: [], followUp: '', note: '', activities: [], source: 'manual' };
   const st = stageOf(v), acc = a && linkedAccount(a);
-  const applied = a && a.source !== 'manual' ? `<details class="crm-app"><summary>📝 신청서 보기 · ${esc(fmt(a.lastApplied || a.created))} · 신청 상태 ${esc(a.status || '—')}</summary><div class="kv">${[['희망 역할', (a.roles || []).join(', ')], ['가능 시간', (a.times || []).join(', ')], ['지원 동기', a.motivation]].filter(x => x[1]).map(([k, val]) => `<div><span class="tiny muted">${k}</span><div style="white-space:pre-wrap">${esc(val)}</div></div>`).join('')}</div></details>` : '';
+  const applied = a && a.source !== 'manual' && a.source !== 'interest' ? `<details class="crm-app"><summary>📝 신청서 보기 · ${esc(fmt(a.lastApplied || a.created))} · 신청 상태 ${esc(a.status || '—')}</summary><div class="kv">${[['희망 역할', (a.roles || []).join(', ')], ['가능 시간', (a.times || []).join(', ')], ['지원 동기', a.motivation]].filter(x => x[1]).map(([k, val]) => `<div><span class="tiny muted">${k}</span><div style="white-space:pre-wrap">${esc(val)}</div></div>`).join('')}</div></details>` : '';
   const acts = (v.activities || []).slice().sort((x, y) => y.ts - x.ts);
   Overlay.open(a ? a.name : '새 연락처', `
   ${a ? `<div class="btn-row" style="flex-wrap:wrap;margin-bottom:10px">${a.email ? `<a class="btn small" href="mailto:${esc(a.email)}">✉ 메일</a>` : ''}${a.phone ? `<a class="btn small" href="tel:${esc(a.phone)}">☎ 전화</a>` : ''}${acc ? `${chip('계정 ' + acc.loginId, 'st-completed')}${btn('합격 안내 메일', 'app-mail', { id: a.id }, 'small')}` : btn('참가자 계정 만들기', 'app-account', { id: a.id }, 'small')}</div>` : ''}
@@ -4338,9 +4409,66 @@ function openContact(id) {
 }
 function mergeApp(r) { if (!r || !r.id) return; ui.apps = ui.apps || []; const i = ui.apps.findIndex(x => x.id === r.id); if (i >= 0) ui.apps[i] = { ...ui.apps[i], ...r }; else ui.apps.unshift(r); }
 
+
+/* ── Director: 랜딩 설정 ───────────────────────────── */
+const LPCFG_GROUPS = [
+  ['시즌 · 버튼', [['season', '시즌 이름', 'Season 01'], ['cta', '신청 버튼 문구', 'Season 01 신청하기'], ['closedCta', '모집 마감 시 버튼 문구', '다음 시즌 알림 받기']]],
+  ['일정 · 장소', [['dates', '기간 (시작일 – 종료일)', '2026.12.05 – 2027.01.23'], ['schedule', '요일·시간', '매주 토요일 오전 10시'], ['meetingLen', '회의 길이', '60–75분, 최종 90분'], ['place', '장소', '강남역 인근 / 온라인 병행'], ['teamSize', '팀당 인원 (숫자)', '8'], ['teams', '모집 팀 수', '2팀 (16명)']]],
+  ['참가비 · 모집', [['fee', '참가비', '390,000원 (8주)'], ['deadline', '모집 마감일', '2026.11.30 (일)'], ['noticeDate', '배정 결과 안내일', '12월 2일']]],
+  ['문의 · 하단', [['contactEmail', '문의 이메일', 'harry@worqend.com'], ['business', '사업자 정보', '상호 · 대표 · 사업자등록번호'], ['privacyUrl', '개인정보 처리방침 링크 (https://…)', 'https://…']]]
+];
+function lpCfgDraftFrom(form) {
+  const d = { ...(ui.lpDraft || lpConfig()) };
+  form.querySelectorAll('[data-lpc]').forEach(el => { d[el.dataset.lpc] = el.type === 'checkbox' ? el.checked : el.value; });
+  d.faqs = [...form.querySelectorAll('[data-faq-row]')].map(r => ({ q: r.querySelector('[data-fq]').value, a: r.querySelector('[data-fa]').value }));
+  return d;
+}
+function pageLpSettings() {
+  if (!ui.lpDraft) { ui.lpDraft = lpConfig(); if (!ui.lpLoading) { ui.lpLoading = true; fetchLpConfig().then(() => { ui.lpDraft = lpConfig(); if (ui.tab === 'lpsettings') render(false); }).catch(e => console.warn(e)).finally(() => { ui.lpLoading = false; }); } }
+  const d = ui.lpDraft, field = ([k, label, ph]) => `<div class="field"><label>${esc(label)}</label><input data-lpc="${k}" value="${esc(d[k] ?? '')}" placeholder="${esc(ph)}" autocapitalize="off"></div>`;
+  return `${notice('여기서 고친 내용은 저장하는 즉시 랜딩 페이지에 반영됩니다. 비워 둔 항목은 랜딩에 “추후 안내”로 표시돼요. 디자인은 그대로이고 문구만 바뀝니다.')}
+  <form data-form="lpcfg-save">
+    ${card(`<div class="eyebrow">모집 상태</div><label class="lp-switch"><input type="checkbox" data-lpc="recruiting" ${d.recruiting ? 'checked' : ''}> <b>지금 모집 중</b> <span class="tiny muted">끄면 신청서 대신 “${esc(d.closedCta || '다음 시즌 알림 받기')}” 폼이 나오고, 남긴 이메일은 CRM에 ‘다음 시즌 알림’ 태그로 들어갑니다.</span></label>
+      <div class="field" style="margin-top:10px"><label>모집 마감 시 안내 문구</label><textarea data-lpc="closedMessage" rows="2">${esc(d.closedMessage || '')}</textarea></div>`)}
+    ${LPCFG_GROUPS.map(([title, fields]) => card(`<div class="eyebrow">${esc(title)}</div><div class="bl-grid">${fields.map(field).join('')}</div>`)).join('')}
+    ${card(`<div class="eyebrow">FAQ</div>${(d.faqs || []).map((x, i) => `<div class="bl-row" data-faq-row><div class="bl-row-head"><b>Q${i + 1}</b><span class="bl-tools">${i ? btn('↑', 'lpfaq-move', { i, d: -1 }, 'small') : ''}${i < d.faqs.length - 1 ? btn('↓', 'lpfaq-move', { i, d: 1 }, 'small') : ''}${btn('삭제', 'lpfaq-del', { i }, 'small danger')}</span></div><div class="field"><label>질문</label><input data-fq value="${esc(x.q)}"></div><div class="field"><label>답변</label><textarea data-fa rows="3">${esc(x.a)}</textarea></div></div>`).join('')}<div class="btn-row">${btn('+ 질문 추가', 'lpfaq-add', {}, 'small')}</div>`)}
+    <div class="error" data-error></div>
+    <div class="bl-bar"><span class="tiny muted bl-cap" data-saved></span><span class="btn-row">${btn('기본값으로', 'lpcfg-reset')}<a class="btn" href="${esc(location.pathname)}" target="_blank" rel="noopener">랜딩 보기 ↗</a><button class="btn primary">저장</button></span></div>
+  </form>`;
+}
+
 /* ── Landing (홍보 페이지 · 신청서) ─────────────────────────── */
 const lp = { open: 0, picks: [] };
-function renderLanding() { const v = landingData(lp); $('landing').innerHTML = VIEW === 'mobile' ? landingMobileHtml(v) : landingPCHtml(v); try { lpMotion(); } catch (e) { console.warn(e); } }
+function renderLanding() {
+  const v = landingData(lp); $('landing').innerHTML = VIEW === 'mobile' ? landingMobileHtml(v) : landingPCHtml(v);
+  if (!v.cfg.recruiting) lpClosedForm(v.cfg);
+  try { lpMotion(); } catch (e) { console.warn(e); }
+}
+/* 모집 마감 시: 신청서 자리에 '다음 시즌 알림 받기' 짧은 폼 (같은 스타일 재사용) */
+function lpClosedForm(cfg) {
+  const wrap = $('lpFormWrap'); if (!wrap) return;
+  const form = wrap.querySelector('form'), inp = form?.querySelector('input[name="name"]'), lab = inp?.closest('label'), sub = form?.querySelector('button[type="submit"]');
+  const consent = form?.querySelector('input[name="consent"]')?.closest('label');
+  const ist = esc(inp?.getAttribute('style') || ''), lst = esc(lab?.getAttribute('style') || ''), bst = esc(sub?.getAttribute('style') || ''), cst = esc(consent?.getAttribute('style') || '');
+  const fst = esc(form?.getAttribute('style') || '');
+  wrap.innerHTML = `<form data-form="lp-interest" novalidate style="${fst}">
+    <p style="margin: 0; line-height: 1.7; color: #3d4441">${esc(cfg.closedMessage)}</p>
+    <label style="${lst}">이름 <input type="text" name="name" required autocomplete="name" style="${ist}"></label>
+    <label style="${lst}">이메일 <input type="email" name="email" required autocomplete="email" style="${ist}"></label>
+    <label style="${cst}"><input type="checkbox" name="consent" value="yes" style="margin-top: 3px"> 다음 시즌 모집 안내를 위한 개인정보 수집·이용에 동의합니다.${cfg.privacyUrl ? ` <a href="${esc(cfg.privacyUrl)}" target="_blank" rel="noopener">개인정보 처리방침</a>` : ''}</label>
+    <div data-lp-error style="color: #a13d32; font-size: 13px; min-height: 16px"></div>
+    <button type="submit" style="${bst}">${esc(cfg.closedCta)}</button></form>`;
+  const done = $('lpDone'); if (done) { const h = done.querySelector('h3, h2, b, strong'); if (h) h.textContent = '알림 신청이 완료되었습니다'; const p = done.querySelector('p'); if (p) p.textContent = '다음 시즌 모집이 열리면 이메일로 가장 먼저 알려드릴게요.'; done.querySelectorAll('[data-act="lp-reset"]').forEach(b => b.remove()); }
+}
+let lpCfgChecked = false;
+function refreshLpConfig() {
+  if (lpCfgChecked) return; lpCfgChecked = true;
+  fetchLpConfig().then(changed => {
+    if (!changed || me) return;
+    const f = document.querySelector('#landing form'); const touched = f && [...f.querySelectorAll('input, textarea')].some(i => (i.type === 'checkbox' ? i.checked : i.value) && i.name !== 'website');
+    if (!touched) renderLanding();
+  }).catch(e => console.debug('landing config', e.message));
+}
 
 /* 랜딩 모션: 디자인은 그대로 두고 등장·스크롤·호버 움직임만 더합니다. (모션 줄이기 설정 시 끔) */
 function lpMotion() {
@@ -4409,7 +4537,7 @@ function showScreen(which) {
   $('login').classList.toggle('hide', which !== 'login');
   $('app').classList.toggle('hide', which !== 'app');
 }
-function showLanding() { if (!$('landing').innerHTML) renderLanding(); showScreen('landing'); document.title = 'Worqend · 주말 프로젝트형 비즈니스 영어'; }
+function showLanding() { if (!$('landing').innerHTML) renderLanding(); refreshLpConfig(); showScreen('landing'); document.title = 'Worqend · 주말 프로젝트형 비즈니스 영어'; }
 let bootPromise = null;
 function ensureBoot() {
   if (!bootPromise) bootPromise = boot().catch(e => { bootPromise = null; console.warn(e); if ($('loginError')) $('loginError').textContent = '데이터 서버 연결 실패: ' + e.message; throw e; });
@@ -4461,6 +4589,7 @@ const PAGES = {
   projects: { title: 'Projects & Excel Import', label: 'Projects', ico: '⬆', group: 'Director', when: isDirector, render: pageProjects },
   builder: { title: 'Project Builder · 직접 만들기', label: 'Builder', ico: '✎', when: isDirector, render: pageBuilder },
   scenario: { title: 'Scenario Console', label: 'Scenario', ico: '✧', group: 'Director', when: isDirector, render: pageScenario },
+  lpsettings: { title: '랜딩 설정', label: '랜딩 설정', ico: '▤', group: 'Director', when: isDirector, render: pageLpSettings },
   crm: { title: 'CRM · 연락처 관리', label: 'CRM', ico: '◎', group: 'Director', when: isDirector, render: pageCrm, badge: () => (ui.apps || []).filter(a => a.followUp && a.followUp <= todayStr()).length },
   applicants: { title: 'Applicants · 참가 신청', label: 'Applicants', ico: '✚', group: 'Director', when: isDirector, render: pageApplicants, badge: () => (ui.apps || []).filter(a => a.status === 'New').length },
   accounts: { title: 'Accounts', label: 'Accounts', ico: '⚙', group: 'Director', when: isDirector, render: pageAccounts, action: () => ({ label: '+ Account', act: 'account-new' }) },
@@ -4612,6 +4741,10 @@ const ACTIONS = {
   'xfer-run': async d => { await walletOp('transfer', { itemId: d.id, opId: 'xfer-' + d.id }); openItem(d.id); },
   'file-download': d => downloadFile(d.id, d.name),
   'attach-remove': d => { ui.compose.files.splice(Number(d.i), 1); paintPicked(); },
+  'lpfaq-add': () => { const f = document.querySelector('form[data-form="lpcfg-save"]'); ui.lpDraft = lpCfgDraftFrom(f); ui.lpDraft.faqs.push({ q: '', a: '' }); render(false); },
+  'lpfaq-del': d => { const f = document.querySelector('form[data-form="lpcfg-save"]'); ui.lpDraft = lpCfgDraftFrom(f); ui.lpDraft.faqs.splice(Number(d.i), 1); render(false); },
+  'lpfaq-move': d => { const f = document.querySelector('form[data-form="lpcfg-save"]'); ui.lpDraft = lpCfgDraftFrom(f); const a = ui.lpDraft.faqs, i = Number(d.i), j = i + Number(d.d); [a[i], a[j]] = [a[j], a[i]]; render(false); },
+  'lpcfg-reset': () => confirmBox('모든 랜딩 문구를 기본값으로 되돌릴까요? (저장을 눌러야 반영됩니다)', () => { ui.lpDraft = { ...LP_DEFAULTS }; render(false); }, '되돌리기'),
   'crm-stage': d => { ui.crmStage = d.s; render(false); },
   'crm-open': d => openContact(d.id),
   'crm-new': () => openContact(null),
@@ -4712,6 +4845,17 @@ const FORMS = {
     const f = formData(form), a = (ui.apps || []).find(x => x.id === form.dataset.id); if (!a) return;
     const r = await saveContact({ id: a.id, activities: [...(a.activities || []), { id: uid(), ts: Date.now(), type: f.type, text: f.text }] });
     mergeApp(r); openContact(a.id); if (ui.tab === 'crm') render(false);
+  },
+  'lp-interest': async form => {
+    const err = form.querySelector('[data-lp-error]'); err.textContent = '';
+    const fd = new FormData(form);
+    try { await submitInterest({ name: fd.get('name'), email: fd.get('email'), consent: fd.get('consent') }); } catch (e) { err.textContent = e.message; return; }
+    form.reset(); $('lpFormWrap').hidden = true; $('lpDone').hidden = false; $('lpDone').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  },
+  'lpcfg-save': async form => {
+    const d = lpCfgDraftFrom(form); const saved = await saveLpConfig(d); ui.lpDraft = { ...lpConfig(), ...saved };
+    $('landing').innerHTML = ''; lpCfgChecked = true;   // 다음에 랜딩을 열 때 새 값으로 그림
+    const m = form.querySelector('[data-saved]'); if (m) m.textContent = '✓ 저장했습니다 · ' + new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
   },
   'lp-apply': async form => {
     const err = form.querySelector('[data-lp-error]'); err.textContent = '';
