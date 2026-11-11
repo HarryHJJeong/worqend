@@ -233,6 +233,7 @@ td.num{text-align:right;white-space:nowrap}td.num.neg{color:var(--danger)}
 .lp-video video{display:block;width:100%;aspect-ratio:16/9;border-radius:18px;background:#000;box-shadow:0 40px 90px -30px rgba(0,0,0,.6)}
 .lp-video-x{position:absolute;right:0;top:-48px;width:40px;height:40px;border-radius:50%;border:0;background:rgba(255,255,255,.14);color:#fff;font-size:16px;cursor:pointer}
 .lp-video-err{color:#fff;text-align:center;padding:40px 0}
+.logo-home{display:inline-block;text-decoration:none;color:inherit;transition:opacity .2s}.logo-home:hover{opacity:.8}
 #landing{background:#faf8f3;color:#252b29;word-break:keep-all;overflow-wrap:break-word;min-height:100vh;font-size:16px}
 #landing a{color:#455d50}#landing a:hover{color:#293e36}
 #landing input:focus,#landing select:focus,#landing textarea:focus{outline:2px solid #8fb36d;outline-offset:1px}
@@ -241,8 +242,8 @@ td.num{text-align:right;white-space:nowrap}td.num.neg{color:var(--danger)}
 </style>
 <div id="landing" class="hide"></div>
 <div id="login" class="auth hide">
-  <div class="auth-brand"><div class="logo">worqend<span class="logo-dot">.</span></div><div><span class="tag">YOUR WEEKEND, REIMAGINED</span><h1>Good weekends.<br>Great possibilities.</h1><p>주말마다 새로운 팀을 만나고, 영어로 이야기하고, 함께 하나의 미션을 완성해요. 일처럼 진짜지만, 수업보다 훨씬 재미있게.</p></div><div style="color:#a9c3b6;font-size:12px">WORQEND CLUB · PROJECT-BASED BUSINESS ENGLISH</div></div>
-  <div class="auth-panel"><form class="login-card" data-form="login"><div class="eyebrow">EMPLOYEE ACCESS</div><h2>Worqend 로그인</h2><p class="muted">Director가 발급한 아이디(또는 이메일)와 비밀번호로 로그인하세요.</p><div class="field"><label for="loginId">아이디</label><input id="loginId" autocomplete="username" required placeholder="예: pm01"></div><div class="field"><label for="loginPw">비밀번호</label><input id="loginPw" type="password" autocomplete="current-password" required placeholder="비밀번호"></div><div id="loginError" class="error"></div><button class="btn primary" type="submit">Sign in →</button><p class="tiny" style="text-align:center;margin-top:18px"><a href="?view=mobile">모바일 화면으로 보기</a></p><p class="tiny" style="text-align:center;margin-top:10px"><a href="#" class="lp-back" data-act="lp-home">← Worqend 소개 · 참가 신청</a></p></form></div>
+  <div class="auth-brand"><a href="#" class="logo logo-home" data-act="lp-home" title="Worqend 소개 페이지로" aria-label="Worqend 소개 페이지로">worqend<span class="logo-dot">.</span></a><div><span class="tag">YOUR WEEKEND, REIMAGINED</span><h1>Good weekends.<br>Great possibilities.</h1><p>주말마다 새로운 팀을 만나고, 영어로 이야기하고, 함께 하나의 미션을 완성해요. 일처럼 진짜지만, 수업보다 훨씬 재미있게.</p></div><div style="color:#a9c3b6;font-size:12px">WORQEND CLUB · PROJECT-BASED BUSINESS ENGLISH</div></div>
+  <div class="auth-panel"><form class="login-card" data-form="login"><div class="eyebrow">EMPLOYEE ACCESS</div><h2>Worqend 로그인</h2><p class="muted">Director가 발급한 아이디(또는 이메일)와 비밀번호로 로그인하세요.</p><div class="field"><label for="loginId">아이디</label><input id="loginId" autocomplete="username" required placeholder="예: pm01"></div><div class="field"><label for="loginPw">비밀번호</label><input id="loginPw" type="password" autocomplete="current-password" required placeholder="비밀번호"></div><div id="loginError" class="error"></div><button class="btn primary" type="submit">Sign in →</button><p class="tiny" style="text-align:center;margin-top:18px"><a href="?view=mobile">모바일 화면으로 보기</a></p><p class="tiny" style="text-align:center;margin-top:10px"><a href="#" class="lp-back" data-act="lp-home">← 홈으로 · Worqend 소개</a></p></form></div>
 </div>
 <div id="app" class="shell hide">
   <aside class="sidebar"><div class="logo">worqend<span class="logo-dot">.</span></div><div class="sublogo">PROJECT WORKSPACE</div><div id="projectSwitch"></div><div class="nav-search"><input id="navSearch" type="search" placeholder="Search menu" autocomplete="off" aria-label="Search menu"><kbd>/</kbd></div><nav id="nav" class="nav"></nav><div class="sidebar-foot"><strong id="sideName"></strong><div id="sideRole" class="tiny"></div><button type="button" data-act="logout">Sign out</button></div></aside>
@@ -440,6 +441,7 @@ td.num{text-align:right;white-space:nowrap}td.num.neg{color:var(--danger)}
 .lp-video video{display:block;width:100%;aspect-ratio:16/9;border-radius:18px;background:#000;box-shadow:0 40px 90px -30px rgba(0,0,0,.6)}
 .lp-video-x{position:absolute;right:0;top:-48px;width:40px;height:40px;border-radius:50%;border:0;background:rgba(255,255,255,.14);color:#fff;font-size:16px;cursor:pointer}
 .lp-video-err{color:#fff;text-align:center;padding:40px 0}
+.logo-home{display:inline-block;text-decoration:none;color:inherit;transition:opacity .2s}.logo-home:hover{opacity:.8}
 #landing{background:#faf8f3;color:#252b29;word-break:keep-all;overflow-wrap:break-word;min-height:100vh;font-size:16px}
 #landing a{color:#455d50}#landing a:hover{color:#293e36}
 #landing input:focus,#landing select:focus,#landing textarea:focus{outline:2px solid #8fb36d;outline-offset:1px}
@@ -448,8 +450,8 @@ td.num{text-align:right;white-space:nowrap}td.num.neg{color:var(--danger)}
 </style>
 <div id="landing" class="hide"></div>
 <div id="login" class="hide">
-  <div class="m-brand"><div class="logo">worqend<span class="logo-dot">.</span></div><span class="tag">YOUR WEEKEND, REIMAGINED</span><h1>Good weekends.<br>Great possibilities.</h1><p>주말마다 새로운 팀을 만나고, 영어로 이야기하고, 함께 하나의 미션을 완성해요.</p></div>
-  <form data-form="login"><div class="eyebrow">EMPLOYEE ACCESS</div><h2>Worqend 로그인</h2><p class="muted tiny" style="line-height:1.7">Director가 발급한 아이디(또는 이메일)와 비밀번호로 로그인하세요.</p><div class="field"><label for="loginId">아이디</label><input id="loginId" autocomplete="username" autocapitalize="off" autocorrect="off" required placeholder="예: pm01"></div><div class="field"><label for="loginPw">비밀번호</label><input id="loginPw" type="password" autocomplete="current-password" required placeholder="비밀번호"></div><div id="loginError" class="error"></div><button class="btn primary" type="submit">Sign in →</button><p class="tiny" style="text-align:center;margin-top:20px"><a href="?view=pc" style="color:var(--sub)">PC 화면으로 보기</a></p><p class="tiny" style="text-align:center;margin-top:10px"><a href="#" class="lp-back" data-act="lp-home">← Worqend 소개 · 참가 신청</a></p></form>
+  <div class="m-brand"><a href="#" class="logo logo-home" data-act="lp-home" title="Worqend 소개 페이지로" aria-label="Worqend 소개 페이지로">worqend<span class="logo-dot">.</span></a><span class="tag">YOUR WEEKEND, REIMAGINED</span><h1>Good weekends.<br>Great possibilities.</h1><p>주말마다 새로운 팀을 만나고, 영어로 이야기하고, 함께 하나의 미션을 완성해요.</p></div>
+  <form data-form="login"><div class="eyebrow">EMPLOYEE ACCESS</div><h2>Worqend 로그인</h2><p class="muted tiny" style="line-height:1.7">Director가 발급한 아이디(또는 이메일)와 비밀번호로 로그인하세요.</p><div class="field"><label for="loginId">아이디</label><input id="loginId" autocomplete="username" autocapitalize="off" autocorrect="off" required placeholder="예: pm01"></div><div class="field"><label for="loginPw">비밀번호</label><input id="loginPw" type="password" autocomplete="current-password" required placeholder="비밀번호"></div><div id="loginError" class="error"></div><button class="btn primary" type="submit">Sign in →</button><p class="tiny" style="text-align:center;margin-top:20px"><a href="?view=pc" style="color:var(--sub)">PC 화면으로 보기</a></p><p class="tiny" style="text-align:center;margin-top:10px"><a href="#" class="lp-back" data-act="lp-home">← 홈으로 · Worqend 소개</a></p></form>
 </div>
 <div id="app" class="hide">
   <header class="m-top"><div class="m-inner"><div class="m-row"><div class="logo">worqend<span class="logo-dot">.</span></div><div class="m-right"><span id="syncState" class="sync"></span><button type="button" class="icon-btn" data-act="refresh" aria-label="새로고침">↻</button></div></div><div class="m-title"><button type="button" id="backBtn" class="back hide" data-act="back" aria-label="뒤로">‹</button><div><div id="crumb" class="eyebrow"></div><h1 id="pageTitle"></h1></div></div></div></header>
@@ -5098,14 +5100,14 @@ const PAGES = {
   crm: { title: 'CRM · Contacts', label: 'CRM', ico: '◎', group: 'Recruiting', when: isDirector, render: pageCrm, badge: () => (ui.apps || []).filter(a => a.followUp && a.followUp <= todayStr()).length },
   applicants: { title: 'Applicants', label: 'Applicants', ico: '✚', group: 'Recruiting', when: isDirector, render: pageApplicants, badge: () => (ui.apps || []).filter(a => a.status === 'New').length },
   accounts: { title: 'Accounts', label: 'Accounts', ico: '⚙', group: 'Program', when: isDirector, render: pageAccounts, action: () => ({ label: '+ Account', act: 'account-new' }) },
-  more: { title: 'More', label: 'More', ico: '≡', mobileOnly: true, render: pageMore }
+  more: { title: 'Menu', label: 'Menu', ico: '≡', mobileOnly: true, render: pageMore }
 };
 const MOBILE_TABS = () => [
   { key: 'overview', label: 'Home', ico: '◈' },
   { key: 'mail', label: 'Mail', ico: '✉', badge: () => project() ? inbox().length : 0 },
   isDirector() ? { key: 'director', label: 'Director', ico: '◎' } : isCoord() ? { key: 'inbox', label: 'Inbox', ico: '⇄', badge: () => pitems().filter(i => i.status === 'Submitted' && i.kind !== 'director_report').length } : isPM() ? { key: 'pm', label: 'PM', ico: '★', badge: () => pmQueue().length } : { key: 'mywork', label: 'My Work', ico: '◉' },
   { key: 'meetings', label: 'Meetings', ico: '☷' },
-  { key: 'more', label: 'More', ico: '≡' }
+  { key: 'more', label: 'Menu', ico: '≡' }
 ];
 
 /* ── Navigation: groups · search · collapse ────────────── */
