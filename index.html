@@ -146,6 +146,47 @@ table.mini td{font-size:12px;padding:6px}
 .chat{height:380px;overflow:auto;background:#f6f8f5;border-radius:12px;padding:12px;margin:10px 0;display:flex;flex-direction:column;gap:8px}
 .bubble{max-width:78%;padding:9px 12px;border-radius:14px;line-height:1.55;font-size:13.5px}.bubble small{display:block;font-size:10px;opacity:.6;margin-top:3px}.bubble.me{align-self:flex-end;background:var(--green);color:white;border-bottom-right-radius:4px}.bubble.npc{align-self:flex-start;background:white;border:1px solid var(--line);border-bottom-left-radius:4px}
 .bubble.typing{display:flex;gap:4px;align-items:center;padding:12px 14px;width:auto}.bubble.typing i{width:7px;height:7px;border-radius:50%;background:#9aa29e;display:block;animation:wqTyping 1s infinite ease-in-out}.bubble.typing i:nth-child(2){animation-delay:.15s}.bubble.typing i:nth-child(3){animation-delay:.3s}@keyframes wqTyping{0%,60%,100%{opacity:.35;transform:translateY(0)}30%{opacity:1;transform:translateY(-3px)}}
+/* messenger */
+.msgr{display:grid;grid-template-columns:320px 1fr;gap:0;height:calc(100vh - 170px);min-height:520px;background:#fff;border:1px solid #e5ebe6;border-radius:16px;overflow:hidden}
+.msgr.m{display:block;height:auto;min-height:0;border:0;background:transparent;border-radius:0;overflow:visible}
+.msg-side{display:flex;flex-direction:column;border-right:1px solid #e5ebe6;min-height:0}
+.msgr.m .msg-side{border:0}
+.msg-tools{padding:12px;display:flex;flex-direction:column;gap:8px;border-bottom:1px solid #eef1ee}
+.msg-tools input{border:1px solid #dbe3dd;border-radius:10px;padding:9px 11px;font:inherit;width:100%}
+.msg-list{overflow:auto;flex:1}
+.msgr.m .msg-list{overflow:visible}
+.msg-item{display:flex;gap:10px;align-items:center;width:100%;text-align:left;padding:11px 12px;border:0;border-bottom:1px solid #f1f4f1;background:none;cursor:pointer;font:inherit;color:inherit}
+.msg-item:hover{background:#f6f8f5}.msg-item.active{background:#eef4e6}
+.msg-item-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.msg-item-top{display:flex;justify-content:space-between;gap:8px}.msg-item-top small{color:#8b938f;font-size:11px;white-space:nowrap}
+.msg-item-sub{font-size:12.5px;color:#6b726e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.msg-tag{display:inline-block;font-size:10.5px;background:#eef1ee;color:#4b5550;border-radius:6px;padding:1px 6px;margin-right:2px}
+.msg-badge{background:#293e36;color:#c7e48b;border-radius:999px;font-size:11px;font-weight:800;min-width:20px;height:20px;display:grid;place-items:center;padding:0 6px}
+.msg-main{display:flex;flex-direction:column;min-height:0}
+.msg-conv{display:flex;flex-direction:column;height:100%;min-height:0}
+.msgr.m .msg-conv{height:calc(100vh - 200px);height:calc(100dvh - 200px)}
+.msg-head{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid #eef1ee}
+.msg-head-t{flex:1;min-width:0;display:flex;flex-direction:column}.msg-head-t small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.msg-head-a{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.msg-log{flex:1;height:auto!important;margin:0!important;border-radius:0!important}
+.msg-form{padding:10px 12px;border-top:1px solid #eef1ee;background:#fff}
+#chatLog ~ .msg-form{border-top:0;padding:0}
+.msg-row{display:flex;gap:8px;align-items:flex-end}
+.msg-row textarea{flex:1;border:1px solid #dbe3dd;border-radius:12px;padding:10px 12px;font:inherit;resize:none;max-height:140px;line-height:1.45}
+.msg-row .attach-btn{cursor:pointer;font-size:18px;padding:8px 6px;border-radius:10px}.msg-row .attach-btn:hover{background:#f1f4f1}
+.msg-picked{display:flex;flex-wrap:wrap;gap:6px}.msg-picked:not(:empty){margin-bottom:8px}
+.msg-picked button{border:0;background:none;cursor:pointer;margin-left:4px}
+.msg-files{display:flex;flex-direction:column;gap:4px;margin-top:6px}
+.bubble.me .attach-chip{background:rgba(255,255,255,.14);color:inherit;border-color:rgba(255,255,255,.25)}
+.msg-text{white-space:pre-wrap;word-break:break-word}
+.msg-who{display:block;font-size:11px;color:#4b6b5e;margin-bottom:2px}
+.msg-del{border:0;background:none;color:inherit;opacity:.7;cursor:pointer;font:inherit;font-size:10px;text-decoration:underline;padding:0}
+.bubble.deleted{opacity:.6}
+.msg-sys{align-self:center;font-size:11px;color:#8b938f;background:#eef1ee;border-radius:999px;padding:3px 10px}
+.msg-empty{flex:1;display:grid;place-items:center;text-align:center;padding:30px}.msg-empty p{max-width:340px;margin:8px auto 14px}
+.msg-pick{padding:14px;overflow:auto;flex:1}
+.msg-checks{display:flex;flex-direction:column;gap:6px;max-height:340px;overflow:auto}
+.msg-check{display:flex;gap:10px;align-items:center;padding:8px;border:1px solid #e5ebe6;border-radius:10px;cursor:pointer}.msg-check span:last-child{display:flex;flex-direction:column}
 .chat-form{display:flex;gap:8px}.chat-form input{flex:1;border:1px solid #dbe3dd;border-radius:10px;padding:10px}
 /* dropzone */
 .dropzone{display:flex;flex-direction:column;align-items:center;gap:6px;border:2px dashed #b9cdb7;border-radius:16px;padding:34px;background:#f7faf4;cursor:pointer;text-align:center}.dropzone:hover{background:#f0f6ea}.dz-icon{font-size:28px;color:var(--green)}
@@ -380,6 +421,48 @@ table.mini{min-width:0}table.mini td{font-size:12px;padding:6px 4px}.matrix td,.
 .chat{height:52vh;overflow:auto;background:#f6f8f5;border-radius:14px;padding:12px;margin:10px 0;display:flex;flex-direction:column;gap:8px}
 .bubble{max-width:82%;padding:9px 12px;border-radius:16px;line-height:1.5;font-size:14.5px}.bubble small{display:block;font-size:10px;opacity:.6;margin-top:3px}.bubble.me{align-self:flex-end;background:var(--green);color:white;border-bottom-right-radius:4px}.bubble.npc{align-self:flex-start;background:white;border:1px solid var(--line);border-bottom-left-radius:4px}
 .bubble.typing{display:flex;gap:4px;align-items:center;padding:12px 14px;width:auto}.bubble.typing i{width:7px;height:7px;border-radius:50%;background:#9aa29e;display:block;animation:wqTyping 1s infinite ease-in-out}.bubble.typing i:nth-child(2){animation-delay:.15s}.bubble.typing i:nth-child(3){animation-delay:.3s}@keyframes wqTyping{0%,60%,100%{opacity:.35;transform:translateY(0)}30%{opacity:1;transform:translateY(-3px)}}
+/* messenger */
+.msgr{display:grid;grid-template-columns:320px 1fr;gap:0;height:calc(100vh - 170px);min-height:520px;background:#fff;border:1px solid #e5ebe6;border-radius:16px;overflow:hidden}
+.msgr.m{display:block;height:auto;min-height:0;border:0;background:transparent;border-radius:0;overflow:visible}
+.msg-side{display:flex;flex-direction:column;border-right:1px solid #e5ebe6;min-height:0}
+.msgr.m .msg-side{border:0}
+.msg-tools{padding:12px;display:flex;flex-direction:column;gap:8px;border-bottom:1px solid #eef1ee}
+.msg-tools input{border:1px solid #dbe3dd;border-radius:10px;padding:9px 11px;font:inherit;width:100%}
+.msg-list{overflow:auto;flex:1}
+.msgr.m .msg-list{overflow:visible}
+.msg-item{display:flex;gap:10px;align-items:center;width:100%;text-align:left;padding:11px 12px;border:0;border-bottom:1px solid #f1f4f1;background:none;cursor:pointer;font:inherit;color:inherit}
+.msg-item:hover{background:#f6f8f5}.msg-item.active{background:#eef4e6}
+.msg-item-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.msg-item-top{display:flex;justify-content:space-between;gap:8px}.msg-item-top small{color:#8b938f;font-size:11px;white-space:nowrap}
+.msg-item-sub{font-size:12.5px;color:#6b726e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.msg-tag{display:inline-block;font-size:10.5px;background:#eef1ee;color:#4b5550;border-radius:6px;padding:1px 6px;margin-right:2px}
+.msg-badge{background:#293e36;color:#c7e48b;border-radius:999px;font-size:11px;font-weight:800;min-width:20px;height:20px;display:grid;place-items:center;padding:0 6px}
+.msg-main{display:flex;flex-direction:column;min-height:0}
+.msg-conv{display:flex;flex-direction:column;height:100%;min-height:0}
+.msgr.m .msg-conv{height:calc(100vh - 200px);height:calc(100dvh - 200px)}
+.msg-head{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid #eef1ee}
+.msg-head-t{flex:1;min-width:0;display:flex;flex-direction:column}.msg-head-t small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.msg-head-a{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.msg-log{flex:1;height:auto!important;margin:0!important;border-radius:0!important}
+.msg-form{padding:10px 12px;border-top:1px solid #eef1ee;background:#fff}
+#chatLog ~ .msg-form{border-top:0;padding:0}
+.msg-row{display:flex;gap:8px;align-items:flex-end}
+.msg-row textarea{flex:1;border:1px solid #dbe3dd;border-radius:12px;padding:10px 12px;font:inherit;resize:none;max-height:140px;line-height:1.45}
+.msg-row .attach-btn{cursor:pointer;font-size:18px;padding:8px 6px;border-radius:10px}.msg-row .attach-btn:hover{background:#f1f4f1}
+.msg-picked{display:flex;flex-wrap:wrap;gap:6px}.msg-picked:not(:empty){margin-bottom:8px}
+.msg-picked button{border:0;background:none;cursor:pointer;margin-left:4px}
+.msg-files{display:flex;flex-direction:column;gap:4px;margin-top:6px}
+.bubble.me .attach-chip{background:rgba(255,255,255,.14);color:inherit;border-color:rgba(255,255,255,.25)}
+.msg-text{white-space:pre-wrap;word-break:break-word}
+.msg-who{display:block;font-size:11px;color:#4b6b5e;margin-bottom:2px}
+.msg-del{border:0;background:none;color:inherit;opacity:.7;cursor:pointer;font:inherit;font-size:10px;text-decoration:underline;padding:0}
+.bubble.deleted{opacity:.6}
+.msg-sys{align-self:center;font-size:11px;color:#8b938f;background:#eef1ee;border-radius:999px;padding:3px 10px}
+.msg-empty{flex:1;display:grid;place-items:center;text-align:center;padding:30px}.msg-empty p{max-width:340px;margin:8px auto 14px}
+.msg-pick{padding:14px;overflow:auto;flex:1}
+.msg-checks{display:flex;flex-direction:column;gap:6px;max-height:340px;overflow:auto}
+.msg-check{display:flex;gap:10px;align-items:center;padding:8px;border:1px solid #e5ebe6;border-radius:10px;cursor:pointer}.msg-check span:last-child{display:flex;flex-direction:column}
+.msg-menu{position:relative}.msg-menu summary{list-style:none;cursor:pointer}.msg-menu summary::-webkit-details-marker{display:none}.msg-menu-pop{position:absolute;right:0;top:calc(100% + 6px);background:#fff;border:1px solid #e5ebe6;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.12);padding:8px;display:flex;flex-direction:column;gap:6px;z-index:20;min-width:160px}.msg-menu-pop .btn{width:100%;justify-content:center}
 .chat-form{display:flex;gap:8px}.chat-form input{flex:1;border:1px solid #dbe3dd;border-radius:12px;padding:12px;font-size:16px}
 .dropzone{display:flex;flex-direction:column;align-items:center;gap:6px;border:2px dashed #b9cdb7;border-radius:18px;padding:26px;background:#f7faf4;text-align:center}.dz-icon{font-size:26px;color:var(--green)}
 .me-card{display:flex;gap:12px;align-items:center}.select-inline{margin-top:8px;padding:8px 10px;font-size:14px}
@@ -559,7 +642,7 @@ const isEmail = s => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(s || '').trim());
 function downloadBlob(blob, name) { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); }
 
 /* ── 4. Storage (local or Google Apps Script) ──────────── */
-const COLLECTIONS = ['projects', 'accounts', 'mails', 'items', 'meetings', 'deliverables', 'events', 'reviews', 'settings', 'assessments', 'npcstates', 'chats', 'ledger', 'purchases', 'finalreports'];
+const COLLECTIONS = ['projects', 'accounts', 'mails', 'items', 'meetings', 'deliverables', 'events', 'reviews', 'settings', 'assessments', 'npcstates', 'chats', 'ledger', 'purchases', 'finalreports', 'rooms', 'roommsgs'];
 const LOCAL_KEY = 'worqend_local_v1';
 
 const LocalStore = {
@@ -983,12 +1066,12 @@ function npcProjectState(senderId, npcEmail) {
   const hasPO = db.purchases.some(p => inProject(p) && p.wallet === sender?.role && norm(p.vendorEmail) === norm(npcEmail) && ['Committed', 'Paid'].includes(p.status));
   return { week: week(), now: Date.now(), orderApproved: hasPO || pitems().some(i => i.kind === 'approval' && i.authorId === senderId && i.decision?.result === 'Approved') };
 }
-async function localNpcReply({ npcEmail, subject, body, thread, cc, channel }) {
+async function localNpcReply({ npcEmail, subject, body, thread, cc, channel, attachments }) {
   const npc = npcConfig(npcEmail), contact = stakeholderByEmail(npcEmail);
   if (!npc || !contact) return [];
   const sid = `${currentProjectId()}|${norm(npcEmail)}|${me.id}`;   // 참가자마다 따로 기억 (다른 사람 대화와 섞이지 않음)
   const prev = db.npcstates.find(x => x.id === sid);
-  const r = NpcEngine.respond({ npc, contact, message: { subject, body }, state: prev?.state, projectState: npcProjectState(me.id, npcEmail), senderName: me.name, channel });
+  const r = NpcEngine.respond({ npc, contact, message: { subject, body, attachments: attachments || [] }, state: prev?.state, projectState: npcProjectState(me.id, npcEmail), senderName: me.name, channel });
   const delay = Number(npc.replyDelayMinutes ?? project()?.npcSettings?.replyDelayMinutes ?? 0) * 60000;
   const now = Date.now();
   const ops = [{ op: 'put', c: 'npcstates', r: { id: sid, projectId: currentProjectId(), npc: norm(npcEmail), userId: me.id, state: r.state, updated: now } }];
@@ -1016,7 +1099,7 @@ async function sendMail({ to, cc, subject, body, thread, missionId, files }) {
     if (npcConfig(to) || stakeholderByEmail(to)) await Store.call({ action: 'npc.reply', projectId: pid, mailId: id, senderId: me.id, senderName: me.name, week: week() }).catch(e => console.warn('NPC reply:', e));
     await sync(); hooks.changed();
   } else {
-    const ops = [{ op: 'put', c: 'mails', r: mail }, ...await localNpcReply({ npcEmail: to, subject, body, thread, cc: ccList })];
+    const ops = [{ op: 'put', c: 'mails', r: mail }, ...await localNpcReply({ npcEmail: to, subject, body, thread, cc: ccList, attachments })];
     await commit(ops);
   }
   return id;
@@ -1031,11 +1114,13 @@ async function setMailDeleted(id, mode) {
 /* NPC chat */
 const chatThread = npcEmail => db.chats.filter(c => inProject(c) && c.userId === me.id && c.npc === norm(npcEmail) && (c.deliverAt || c.ts) <= Date.now()).sort((a, b) => a.ts - b.ts);
 /** 채팅 보내기 — 서버 왕복 1번으로 내 메시지 저장 + 답장 생성 (전체 sync 없이 바로 반영) */
-async function sendChat(npcEmail, text, { quiet } = {}) {
-  text = String(text || '').trim().slice(0, 2000); if (!text) return null;
+async function sendChat(npcEmail, text, { quiet, files } = {}) {
+  text = String(text || '').trim().slice(0, 2000); files = (files || []).filter(f => f && f.size);
+  if (!text && !files.length) return null;
   if (!stakeholderByEmail(npcEmail)) throw Error('Contact not found.');
+  const attachments = await uploadAll(files);
   const now = Date.now(), pid = currentProjectId();
-  const msg = { id: uid(), projectId: pid, npc: norm(npcEmail), userId: me.id, from: 'user', text, ts: now };
+  const msg = { id: uid(), projectId: pid, npc: norm(npcEmail), userId: me.id, from: 'user', text, ts: now, ...(attachments.length ? { attachments } : {}) };
   const upsert = recs => { for (const r of recs || []) { const i = db.chats.findIndex(x => x.id === r.id); if (i >= 0) db.chats[i] = r; else db.chats.push(r); } };
   if (Store.mode === 'remote') {
     let res = null;
@@ -1043,7 +1128,7 @@ async function sendChat(npcEmail, text, { quiet } = {}) {
     if (res && res.records) upsert(res.records);
     else { await Store.write([{ op: 'put', c: 'chats', r: msg }]); await Store.call({ action: 'npc.chat', projectId: pid, chatId: msg.id, senderId: me.id, senderName: me.name, week: week() }); await sync(); }   // 이전 버전 Code.gs
   } else {
-    const ops = [{ op: 'put', c: 'chats', r: msg }, ...await localNpcReply({ npcEmail, subject: '', body: text, channel: 'chat' })];
+    const ops = [{ op: 'put', c: 'chats', r: msg }, ...await localNpcReply({ npcEmail, subject: '', body: text, channel: 'chat', attachments })];
     await Store.write(ops); upsert(ops.filter(o => o.c === 'chats').map(o => o.r));
     for (const o of ops.filter(o => o.c === 'npcstates')) { const i = db.npcstates.findIndex(x => x.id === o.r.id); if (i >= 0) db.npcstates[i] = o.r; else db.npcstates.push(o.r); }
   }
@@ -1051,6 +1136,108 @@ async function sendChat(npcEmail, text, { quiet } = {}) {
   return msg;
 }
 const npcStateOf = email => (db.npcstates.find(x => x.id === `${currentProjectId()}|${norm(email)}|${me?.id}`) || db.npcstates.find(x => x.id === `${currentProjectId()}|${norm(email)}`))?.state || null;
+
+
+/* ── Messenger: team DMs · group chats · contact chats (같은 chats 데이터를 Directory 채팅과 공유) ── */
+const msgName = id => id === DIRECTOR.id ? DIRECTOR.name : nameOf(id);
+const myRooms = () => db.rooms.filter(r => inProject(r) && !r.removed && (r.members || []).includes(me.id));
+const roomById = id => db.rooms.find(r => r.id === id);
+const roomMessages = room => { const c = (room.cleared || {})[me.id] || 0; return db.roommsgs.filter(m => m.roomId === room.id && m.ts > c).sort((a, b) => a.ts - b.ts); };
+const roomTitle = room => room.kind === 'group' ? room.name : msgName((room.members || []).find(x => x !== me.id) || me.id);
+const npcChats = () => db.chats.filter(c => inProject(c) && c.userId === me.id);
+const msgPeople = () => [...(me.id !== DIRECTOR.id ? [{ id: DIRECTOR.id, name: DIRECTOR.name, sub: 'Director' }] : []), ...members().filter(u => u.id !== me.id).map(u => ({ id: u.id, name: u.name, sub: roleTitle(u.role, project()) }))];
+function upsertLocal(col, recs) { for (const r of recs || []) { const i = db[col].findIndex(x => x.id === r.id); if (i >= 0) db[col][i] = r; else db[col].push(r); } }
+async function msgWrite(ops) {
+  await Store.write(ops);
+  for (const o of ops) { if (o.op === 'put') upsertLocal(o.c, [o.r]); if (o.op === 'remove') db[o.c] = db[o.c].filter(r => r.id !== o.id); }
+}
+/** 대화 목록 (팀 1:1, 그룹, 업체 채팅) — 최신순 */
+function conversations() {
+  const out = [];
+  for (const r of myRooms()) {
+    const ms = roomMessages(r), last = ms[ms.length - 1];
+    if (!last && r.kind === 'dm' && r.createdBy !== me.id) continue;
+    if (!last && (r.cleared || {})[me.id]) continue;
+    out.push({ key: 'room:' + r.id, kind: r.kind, title: roomTitle(r), sub: last ? (last.system ? last.text : `${last.from === me.id ? 'You: ' : r.kind === 'group' ? msgName(last.from).split(' ')[0] + ': ' : ''}${last.deleted ? 'Message deleted' : last.text || '📎 ' + (last.attachments || []).map(f => f.name).join(', ')}`) : r.kind === 'group' ? `${r.members.length} members` : 'New conversation', ts: last ? last.ts : r.created, unread: unreadCount('room:' + r.id, ms.filter(m => m.from !== me.id && !m.system && !m.deleted)), members: r.members });
+  }
+  const byNpc = {};
+  for (const c of npcChats()) if ((c.deliverAt || c.ts) <= Date.now()) (byNpc[c.npc] = byNpc[c.npc] || []).push(c);
+  for (const [npc, ms] of Object.entries(byNpc)) {
+    ms.sort((a, b) => a.ts - b.ts); const s = stakeholderByEmail(npc), last = ms[ms.length - 1];
+    if (!s) continue;
+    out.push({ key: 'npc:' + npc, kind: 'npc', title: s.name, company: s.company, sub: `${last.from === 'user' ? 'You: ' : ''}${last.text || '📎 ' + (last.attachments || []).map(f => f.name).join(', ')}`, ts: last.ts, unread: unreadCount('npc:' + npc, ms.filter(m => m.from === 'npc')) });
+  }
+  return out.sort((a, b) => b.ts - a.ts);
+}
+/* 읽음 표시 (이 기기 기준) */
+const READ_KEY = () => 'worqend_msg_read_v1_' + (me?.id || '');
+const readMap = () => { try { return JSON.parse(localStorage.getItem(READ_KEY()) || '{}'); } catch (_) { return {}; } };
+function markRead(key) { const m = readMap(); m[key] = Date.now(); try { localStorage.setItem(READ_KEY(), JSON.stringify(m)); } catch (_) {} }
+function unreadCount(key, incoming) { const t = readMap()[key] || 0; return incoming.filter(m => (m.deliverAt || m.ts) > t).length; }
+const totalUnread = () => me && project() ? conversations().reduce((s, c) => s + c.unread, 0) : 0;
+
+async function openDm(userId) {
+  const pid = currentProjectId(), pair = [me.id, userId].sort();
+  const id = `dm|${pid}|${pair.join('|')}`;
+  let r = roomById(id);
+  const now = Date.now();
+  if (!r) { r = { id, projectId: pid, kind: 'dm', members: pair, createdBy: me.id, created: now, u: now }; await msgWrite([{ op: 'put', c: 'rooms', r }]); }
+  else if (r.removed || !r.members.includes(me.id)) { r = { ...r, removed: false, members: [...new Set([...r.members, me.id])], u: now }; await msgWrite([{ op: 'put', c: 'rooms', r }]); }
+  return r;
+}
+async function createGroup(name, memberIds) {
+  name = String(name || '').trim().slice(0, 60); if (!name) throw Error('Please enter a group name.');
+  const ids = [...new Set([me.id, ...(memberIds || [])])]; if (ids.length < 3) throw Error('Choose at least two people for a group.');
+  const now = Date.now(), r = { id: 'grp-' + uid(), projectId: currentProjectId(), kind: 'group', name, members: ids, createdBy: me.id, created: now, u: now };
+  await msgWrite([{ op: 'put', c: 'rooms', r }, { op: 'put', c: 'roommsgs', r: { id: uid(), projectId: r.projectId, roomId: r.id, from: me.id, system: true, text: `${me.name} created the group “${name}”`, ts: now, u: now } }]);
+  return r;
+}
+async function addGroupMembers(roomId, ids) {
+  const r = roomById(roomId); if (!r) return; const add = ids.filter(x => !r.members.includes(x)); if (!add.length) return;
+  const now = Date.now();
+  await msgWrite([{ op: 'put', c: 'rooms', r: { ...r, members: [...r.members, ...add], u: now } }, { op: 'put', c: 'roommsgs', r: { id: uid(), projectId: r.projectId, roomId, from: me.id, system: true, text: `${me.name} added ${add.map(msgName).join(', ')}`, ts: now, u: now } }]);
+}
+async function leaveGroup(roomId) {
+  const r = roomById(roomId); if (!r) return; const now = Date.now();
+  await msgWrite([{ op: 'put', c: 'rooms', r: { ...r, members: r.members.filter(x => x !== me.id), u: now } }, { op: 'put', c: 'roommsgs', r: { id: uid(), projectId: r.projectId, roomId, from: me.id, system: true, text: `${me.name} left the group`, ts: now, u: now } }]);
+}
+/** 대화 삭제 = 내 화면에서 지우기 (상대방 기록은 그대로) */
+async function clearRoomForMe(roomId) { const r = roomById(roomId); if (!r) return; const now = Date.now(); await msgWrite([{ op: 'put', c: 'rooms', r: { ...r, cleared: { ...(r.cleared || {}), [me.id]: now }, u: now } }]); }
+async function deleteGroupForAll(roomId) { const r = roomById(roomId); if (!r) return; if (r.createdBy !== me.id && !isDirector()) throw Error('Only the person who created the group can delete it.'); await msgWrite([{ op: 'put', c: 'rooms', r: { ...r, removed: true, u: Date.now() } }]); }
+async function sendRoomMsg(roomId, text, files) {
+  text = String(text || '').trim().slice(0, 4000); files = (files || []).filter(f => f && f.size);
+  if (!text && !files.length) return null;
+  const r = roomById(roomId); if (!r || !r.members.includes(me.id)) throw Error('You are not in this conversation.');
+  const attachments = await uploadAll(files);
+  const now = Date.now(), m = { id: uid(), projectId: r.projectId, roomId, from: me.id, text, ts: now, u: now, ...(attachments.length ? { attachments } : {}) };
+  const ops = [{ op: 'put', c: 'roommsgs', r: m }];
+  const cl = r.cleared || {}; if (r.kind === 'dm' && Object.keys(cl).length) ops.push({ op: 'put', c: 'rooms', r: { ...r, u: now } });
+  await msgWrite(ops);
+  return m;
+}
+async function unsendRoomMsg(id) { const m = db.roommsgs.find(x => x.id === id); if (!m) return; if (m.from !== me.id) throw Error('You can only delete your own messages.'); await msgWrite([{ op: 'put', c: 'roommsgs', r: { ...m, text: '', attachments: [], deleted: true, u: Date.now() } }]); }
+async function deleteNpcChatMsg(id) { const c = db.chats.find(x => x.id === id); if (!c || c.userId !== me.id) return; await msgWrite([{ op: 'remove', c: 'chats', id }]); }
+async function clearNpcChat(npcEmail) { const ids = npcChats().filter(c => c.npc === norm(npcEmail)).map(c => c.id); if (ids.length) await msgWrite(ids.map(id => ({ op: 'remove', c: 'chats', id }))); }
+async function uploadAll(files) {
+  if (files.length > MAX_ATTACH) throw Error(`You can attach up to ${MAX_ATTACH} files.`);
+  const big = files.find(f => f.size > CONFIG.MAX_UPLOAD); if (big) throw Error(`"${big.name}" — files can be up to 2 MB.`);
+  const out = []; for (const f of files) { const up = await uploadFile(f); out.push({ id: up.id, name: up.name || f.name, size: f.size, type: f.type || '' }); }
+  return out;
+}
+/** 새 메시지만 가볍게 받아오기 (메신저 화면이 열려 있을 때) */
+let msgPollAt = 0;
+async function pollMessenger() {
+  if (!me || !project()) return false;
+  if (Store.mode === 'local') { const d = await Store.sync(); const before = JSON.stringify([db.rooms.length, db.roommsgs.length, db.chats.length, db.roommsgs.reduce((s, m) => s + (m.u || 0), 0)]); for (const c of ['rooms', 'roommsgs', 'chats']) db[c] = d[c] || []; return before !== JSON.stringify([db.rooms.length, db.roommsgs.length, db.chats.length, db.roommsgs.reduce((s, m) => s + (m.u || 0), 0)]); }
+  const since = msgPollAt ? msgPollAt - 30000 : 0;
+  const res = await Store.call({ action: 'msg.poll', projectId: currentProjectId(), since }).catch(() => null);
+  if (!res) return false;
+  msgPollAt = res.now || Date.now();
+  let changed = false;
+  for (const c of ['rooms', 'roommsgs', 'chats']) for (const r of res[c] || []) { const cur = db[c].find(x => x.id === r.id); if (!cur || JSON.stringify(cur) !== JSON.stringify(r)) { upsertLocal(c, [r]); changed = true; } }
+  if (res.chatIds) { const keep = new Set(res.chatIds); const n = db.chats.length; db.chats = db.chats.filter(c => !inProject(c) || keep.has(c.id)); if (db.chats.length !== n) changed = true; }
+  return changed;
+}
 
 /* Email assessment records (규칙 기반 · 서버 연결 시 서버에서 재평가해 저장) */
 function assessmentInput({ to, subject, body, missionId, emailType }) {
@@ -2756,7 +2943,13 @@ const NpcEngine = (function () {
     const learned = newFactsText(prevFacts, st.facts, npc.kind);
     // 새로 받은 정보가 있으면 먼저 확인해 줌 (고객 페르소나 제외)
     if (learned && npc.kind !== 'customer' && !intents.includes('thanks')) blocks.push(generateReply(TEMPLATES.common.ack, { facts: learned }, st.turns));
-    if (!biz.length) blocks.push(...socialReply({ npc, contact, social, intents, st, first: first0, seed, lastCore: st.lastCore }));
+    const att = (message.attachments || []).filter(f => f && f.name);
+    if (att.length) {
+      const names = att.map(f => f.name).slice(0, 3).join(', ');
+      blocks.push(generateReply(style0 === 'formal' ? [`Thank you for sending ${names}. I will review ${att.length > 1 ? 'them' : 'it'} and come back to you if I have any questions.`, `I have received ${names} — thank you. I will take a look shortly.`, `Thanks for the file${att.length > 1 ? 's' : ''} (${names}). Let me check and get back to you.`] : [`Got it, thanks for ${names}! I’ll take a look.`, `Thanks for sending ${names} — checking now.`, `Received ${names}, thanks!`], {}, seed));
+    }
+    if (!biz.length && att.length) { const ctx = contextLine(npc, st); if (ctx.length) blocks.push(ctx[seed % ctx.length]); }   // 파일 + 짧은 말: 확인 인사 + 다음 단계
+    else if (!biz.length) blocks.push(...socialReply({ npc, contact, social, intents, st, first: first0, seed, lastCore: st.lastCore }));
     for (const intent of biz.slice(0, 3)) {
       const r = selectScenarioResponse({ npc, intent, entities, projectState, state: st });
       st = { ...r.state, facts: st.facts, turns: st.turns }; blocks.push(...r.blocks); if (r.outcome) outcomes.push(r.outcome);
@@ -4601,7 +4794,7 @@ function openMeetingForm(id, preWeek) {
 /* Directory & chat */
 function pageDirectory() {
   const p = project(); if (!p) return noProject();
-  return `<div class="grid g2">${card(`<div class="eyebrow">CLIENT PROFILE</div><h3>${esc(p.client)}</h3>${kv(p.clientProfile || [])}`)}${card(`<div class="eyebrow">TEAM</div>${list([listRow({ title: DIRECTOR.name, sub: 'Director · ' + DIRECTOR.email, avatar: initials(DIRECTOR.name), right: me.id !== DIRECTOR.id ? btn('✉', 'compose', { to: DIRECTOR.email }, 'small') : '' }), ...members().map(u => listRow({ title: u.name, sub: `${roleTitle(u.role)} · ${u.email}`, avatar: initials(u.name), right: u.id !== me.id ? btn('✉', 'compose', { to: u.email }, 'small') : chip('You') }))], 'No members yet.')}`)}</div>
+  return `<div class="grid g2">${card(`<div class="eyebrow">CLIENT PROFILE</div><h3>${esc(p.client)}</h3>${kv(p.clientProfile || [])}`)}${card(`<div class="eyebrow">TEAM</div>${list([listRow({ title: DIRECTOR.name, sub: 'Director · ' + DIRECTOR.email, avatar: initials(DIRECTOR.name), right: me.id !== DIRECTOR.id ? `${btn('💬', 'msg-dm-go', { id: DIRECTOR.id }, 'small')}${btn('✉', 'compose', { to: DIRECTOR.email }, 'small')}` : '' }), ...members().map(u => listRow({ title: u.name, sub: `${roleTitle(u.role)} · ${u.email}`, avatar: initials(u.name), right: u.id !== me.id ? `${btn('💬', 'msg-dm-go', { id: u.id }, 'small')}${btn('✉', 'compose', { to: u.email }, 'small')}` : chip('You') }))], 'No members yet.')}`)}</div>
   ${sectionTitle('Business contacts (simulated)', `<span class="muted tiny">Emails and chats get automatic, rule-based replies (not AI)</span>`)}
   ${list(stakeholders().map(s => { const st = npcStateOf(s.email); return listRow({ title: `${s.name} · ${s.company}`, sub: `${s.title}${s.type ? ' · ' + s.type : ''} · ${s.email}${st ? ' · ' + st.state.replace(/_/g, ' ').toLowerCase() : ''}`, avatar: initials(s.name), right: `${btn('Chat', 'chat-open', { npc: s.email }, 'small')}${btn('✉', 'compose', { to: s.email }, 'small')}` }); }), 'No business contacts.')}
   ${p.vendors ? `${sectionTitle('Vendor overview')}<div class="table-wrap card"><table><thead><tr>${p.vendors.columns.map(c => `<th>${esc(c)}</th>`).join('')}</tr></thead><tbody>${p.vendors.rows.map(r => `<tr>${r.map(c => `<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>` : ''}`;
@@ -4609,13 +4802,103 @@ function pageDirectory() {
 function openChat(npcEmail) {
   const s = stakeholderByEmail(npcEmail); if (!s) return;
   ui.chatWith = norm(npcEmail);
-  Overlay.open(`Chat · ${s.name}`, `<div class="tiny muted">${esc(s.title)} · ${esc(s.company)} — simulated, rule-based replies</div><div class="chat" id="chatLog">${renderChatLog(npcEmail)}</div><form data-form="chat-send" data-npc="${esc(npcEmail)}" class="chat-form"><input name="text" autocomplete="off" placeholder="Write in English…" required><button class="btn primary">Send</button></form>`);
+  ui.msgFiles = [];
+  Overlay.open(`Chat · ${s.name}`, `<div class="tiny muted">${esc(s.title)} · ${esc(s.company)} — simulated, rule-based replies · also in ${btn('Messenger →', 'msg-goto', { key: 'npc:' + norm(npcEmail) }, 'small ghost')}</div><div class="chat" id="chatLog">${renderChatLog(npcEmail)}</div><form data-form="chat-send" data-npc="${esc(npcEmail)}" class="msg-form"><div id="msgPicked" class="msg-picked"></div><div class="msg-row"><label class="attach-btn" title="Attach files">📎<input type="file" multiple data-change="msg-files" hidden></label><textarea name="text" rows="1" autocomplete="off" placeholder="Write in English…" data-msg-input></textarea><button class="btn primary">Send</button></div><div class="error" data-error></div></form>`);
+  markRead('npc:' + norm(npcEmail));
   const log = $('chatLog'); if (log) log.scrollTop = log.scrollHeight;
 }
 const chatTime = ts => { const d = new Date(ts), t = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }); return d.toDateString() === new Date().toDateString() ? t : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ', ' + t; };
-function renderChatLog(npcEmail) {
+function renderChatLog(npcEmail) { return npcLogHtml(npcEmail); }
+
+
+/* ── Messenger ─────────────────────────────────────── */
+ui.msgDraft = {}; ui.msgFiles = []; ui.msgQ = '';
+const attachChips = list => (list || []).length ? `<div class="msg-files">${list.map(f => `<button type="button" class="attach-chip" data-act="file-download" data-id="${esc(f.id)}" data-name="${esc(f.name)}">📎 ${esc(f.name)}<small> ${esc(fmtSize(f.size || 0))}</small></button>`).join('')}</div>` : '';
+function bubbleHtml({ mine, who, text, ts, attachments, deleted, system, del }) {
+  if (system) return `<div class="msg-sys">${esc(text)} · ${esc(chatTime(ts))}</div>`;
+  return `<div class="bubble ${mine ? 'me' : 'npc'} ${deleted ? 'deleted' : ''}">${who ? `<b class="msg-who">${esc(who)}</b>` : ''}${deleted ? '<div><i>Message deleted</i></div>' : `${text ? `<div class="msg-text">${esc(text)}</div>` : ''}${attachChips(attachments)}`}<small>${esc(chatTime(ts))}${del && !deleted ? ` · <button type="button" class="msg-del" data-act="${del.act}" data-id="${esc(del.id)}" title="Delete" aria-label="Delete message">Delete</button>` : ''}</small></div>`;
+}
+function npcLogHtml(npcEmail) {
   const msgs = chatThread(npcEmail);
-  return msgs.length ? msgs.map(c => `<div class="bubble ${c.from === 'user' ? 'me' : 'npc'}"><div>${esc(c.text)}</div><small>${esc(chatTime(c.ts))}</small></div>`).join('') : `<div class="empty">Start the conversation — e.g. “What is your lead time for 500 units?”</div>`;
+  return msgs.length ? msgs.map(c => bubbleHtml({ mine: c.from === 'user', text: c.text, ts: c.ts, attachments: c.attachments, del: { act: 'npcmsg-del', id: c.id } })).join('') : `<div class="empty">Start the conversation — e.g. “What is your lead time for 500 units?”</div>`;
+}
+function roomLogHtml(room) {
+  const msgs = roomMessages(room);
+  return msgs.length ? msgs.map(m => bubbleHtml({ mine: m.from === me.id, who: room.kind === 'group' && m.from !== me.id && !m.system ? msgName(m.from) : '', text: m.text, ts: m.ts, attachments: m.attachments, deleted: m.deleted, system: m.system, del: m.from === me.id ? { act: 'roommsg-del', id: m.id } : null })).join('') : `<div class="empty">Say hello 👋 — messages here are only visible to ${room.kind === 'group' ? 'the group members' : 'the two of you'}.</div>`;
+}
+function msgListHtml() {
+  const q = (ui.msgQ || '').toLowerCase();
+  const items = conversations().filter(c => !q || (c.title + ' ' + (c.company || '') + ' ' + c.sub).toLowerCase().includes(q));
+  return items.length ? items.map(c => `<button type="button" class="msg-item ${ui.msgKey === c.key ? 'active' : ''}" data-act="msg-open" data-key="${esc(c.key)}"><span class="avatar ${c.kind === 'npc' ? 'ext' : ''}">${c.kind === 'group' ? '👥' : esc(initials(c.title))}</span><span class="msg-item-main"><span class="msg-item-top"><b>${esc(c.title)}</b><small>${esc(chatTime(c.ts))}</small></span><span class="msg-item-sub">${c.kind === 'npc' ? `<span class="msg-tag">${esc(c.company || 'Contact')}</span> ` : c.kind === 'group' ? '<span class="msg-tag">Group</span> ' : ''}${esc(c.sub).slice(0, 80)}</span></span>${c.unread ? `<span class="msg-badge">${c.unread}</span>` : ''}</button>`).join('') : `<div class="empty">${q ? 'No conversations match.' : 'No conversations yet. Start one with “+ Message” or “+ Group”.'}</div>`;
+}
+function convInfo(key) {
+  if (!key) return null;
+  if (key.startsWith('npc:')) { const s = stakeholderByEmail(key.slice(4)); return s ? { kind: 'npc', npc: s.email, title: s.name, sub: `${s.title} · ${s.company} — simulated, rule-based replies`, log: npcLogHtml(s.email), actions: `${btn('✉ Email', 'compose', { to: s.email }, 'small')}${btn('Delete chat', 'msg-clear', { key }, 'small ghost danger')}` } : null; }
+  const r = roomById(key.slice(5)); if (!r || !r.members.includes(me.id) || r.removed) return null;
+  const others = r.members.filter(x => x !== me.id);
+  return { kind: r.kind, room: r, title: roomTitle(r), sub: r.kind === 'group' ? `${r.members.length} members · ${r.members.map(msgName).join(', ')}` : (others[0] === DIRECTOR.id ? 'Director' : roleTitle(accountById(others[0])?.role, project()) || ''), log: roomLogHtml(r),
+    actions: r.kind === 'group' ? `${btn('+ Add', 'grp-add', { id: r.id }, 'small')}${btn('Leave', 'grp-leave', { id: r.id }, 'small')}${r.createdBy === me.id || isDirector() ? btn('Delete group', 'grp-del', { id: r.id }, 'small ghost danger') : btn('Delete chat', 'msg-clear', { key }, 'small ghost danger')}` : btn('Delete chat', 'msg-clear', { key }, 'small ghost danger') };
+}
+function pickedHtml() { return ui.msgFiles.map((f, i) => `<span class="attach-chip">📎 ${esc(f.name)} <small>${esc(fmtSize(f.size))}</small><button type="button" data-act="msgfile-remove" data-i="${i}" aria-label="Remove attachment">✕</button></span>`).join(''); }
+function convHtml(key) {
+  const c = convInfo(key);
+  if (!c) return `<div class="msg-empty"><div><b>Pick a conversation</b><p class="muted">Message teammates one-on-one, create a group, or chat with business contacts. Chats you start in Directory appear here too.</p><div class="btn-row" style="justify-content:center">${btn('+ Message', 'msg-new', { mode: 'dm' }, 'primary')}${btn('+ Group', 'msg-new', { mode: 'group' })}</div></div></div>`;
+  return `<div class="msg-conv"><div class="msg-head">${VIEW === 'mobile' ? btn('←', 'msg-back', {}, 'small ghost') : ''}<span class="avatar ${c.kind === 'npc' ? 'ext' : ''}">${c.kind === 'group' ? '👥' : esc(initials(c.title))}</span><div class="msg-head-t"><b>${esc(c.title)}</b><small class="muted">${esc(c.sub)}</small></div>${VIEW === 'mobile' ? `<details class="msg-menu"><summary class="btn small" aria-label="More">⋯</summary><div class="msg-menu-pop">${c.actions}</div></details>` : `<span class="msg-head-a">${c.actions}</span>`}</div>
+  <div class="msg-log chat" id="msgLog">${c.log}</div>
+  <form data-form="msg-send" data-key="${esc(key)}" class="msg-form"><div id="msgPicked" class="msg-picked">${pickedHtml()}</div><div class="msg-row"><label class="attach-btn" title="Attach files">📎<input type="file" multiple data-change="msg-files" hidden></label><textarea name="text" rows="1" placeholder="Write in English…" data-msg-input>${esc(ui.msgDraft[key] || '')}</textarea><button class="btn primary">Send</button></div><div class="error" data-error></div></form></div>`;
+}
+function newConvHtml() {
+  const mode = ui.msgNew, people = msgPeople();
+  const head = `<div class="msg-head">${btn('←', 'msg-new-cancel', {}, 'small ghost')}<div class="msg-head-t"><b>${mode === 'group' ? 'New group' : mode === 'add' ? 'Add people' : 'New message'}</b><small class="muted">${mode === 'dm' ? 'Teammates and business contacts' : 'Choose two or more people'}</small></div></div>`;
+  if (mode === 'dm') return `<div class="msg-conv">${head}<div class="msg-pick">${sectionTitle('Team')}${list(people.map(u => listRow({ title: u.name, sub: u.sub, avatar: initials(u.name), act: 'msg-dm', data: { id: u.id } })), 'No teammates yet.')}${sectionTitle('Business contacts (simulated)')}${list(stakeholders().map(s => listRow({ title: s.name, sub: `${s.title} · ${s.company}`, avatar: initials(s.name), act: 'msg-open', data: { key: 'npc:' + norm(s.email) } })), 'No contacts.')}</div></div>`;
+  const room = mode === 'add' ? roomById(ui.msgAddTo) : null;
+  const choices = people.filter(u => !room || !room.members.includes(u.id));
+  return `<div class="msg-conv">${head}<form data-form="${mode === 'add' ? 'grp-add' : 'grp-create'}" class="msg-pick"${room ? ` data-id="${esc(room.id)}"` : ''}>${mode === 'group' ? `<div class="field"><label>Group name</label><input name="name" required maxlength="60" placeholder="e.g. Pricing task force"></div>` : ''}<div class="field"><label>Members</label><div class="msg-checks">${choices.map(u => `<label class="msg-check"><input type="checkbox" name="m" value="${esc(u.id)}"><span class="avatar">${esc(initials(u.name))}</span><span><b>${esc(u.name)}</b><small class="muted">${esc(u.sub)}</small></span></label>`).join('') || '<p class="muted tiny">Everyone is already in this group.</p>'}</div></div><div class="error" data-error></div><div class="btn-row end"><button class="btn primary">${mode === 'add' ? 'Add to group' : 'Create group'}</button></div></form></div>`;
+}
+function pageMessenger() {
+  const p = project(); if (!p) return noProject();
+  if (ui.msgKey && !convInfo(ui.msgKey)) ui.msgKey = null;
+  const right = ui.msgNew ? newConvHtml() : convHtml(ui.msgKey);
+  const left = `<div class="msg-side"><div class="msg-tools"><input type="search" placeholder="Search conversations" value="${esc(ui.msgQ)}" data-msg-search><span class="btn-row">${btn('+ Message', 'msg-new', { mode: 'dm' }, 'small primary')}${btn('+ Group', 'msg-new', { mode: 'group' }, 'small')}</span></div><div class="msg-list" id="msgList">${msgListHtml()}</div></div>`;
+  setTimeout(msgAfterRender, 0);
+  if (VIEW === 'mobile') return `<div class="msgr m">${ui.msgKey || ui.msgNew ? right : left}</div>`;
+  return `<div class="msgr">${left}<div class="msg-main">${right}</div></div>`;
+}
+function msgAfterRender() {
+  const log = $('msgLog'); if (log) log.scrollTop = log.scrollHeight;
+  if (ui.msgKey && ui.tab === 'messenger') { markRead(ui.msgKey); const el = document.querySelector(`#msgList [data-key="${CSS.escape(ui.msgKey)}"] .msg-badge`); if (el) el.remove(); }
+  const ta = document.querySelector('[data-msg-input]'); if (ta) msgGrow(ta);
+}
+function msgGrow(ta) { ta.style.height = 'auto'; ta.style.height = Math.min(140, ta.scrollHeight) + 'px'; }
+/** 새 메시지가 오면 목록과 대화만 다시 그림 (쓰던 글은 유지) */
+function msgRefresh() {
+  if (ui.tab === 'messenger') {
+    const list = $('msgList'); if (list) list.innerHTML = msgListHtml();
+    const log = $('msgLog'); const c = convInfo(ui.msgKey);
+    if (log && c && !ui.chatBusy) { const atEnd = log.scrollHeight - log.scrollTop - log.clientHeight < 60; log.innerHTML = c.log; if (atEnd) log.scrollTop = log.scrollHeight; markRead(ui.msgKey); const b = document.querySelector(`#msgList [data-key="${CSS.escape(ui.msgKey)}"] .msg-badge`); if (b) b.remove(); }
+  }
+  if (ui.chatWith && $('chatLog') && !ui.chatBusy) { $('chatLog').innerHTML = npcLogHtml(ui.chatWith); $('chatLog').scrollTop = $('chatLog').scrollHeight; }
+  Shell.chrome(ui.tab, PAGES[ui.tab]);
+}
+let msgTimer = null;
+function msgPollLoop() {
+  clearTimeout(msgTimer);
+  const active = me && (ui.tab === 'messenger' || ui.chatWith);
+  msgTimer = setTimeout(async () => { if (me && !document.hidden) { try { if (await pollMessenger()) msgRefresh(); } catch (e) { console.warn(e); } } msgPollLoop(); }, active ? 4000 : 30000);
+}
+/** 보내기: 내 메시지는 바로, 업체 답장은 "입력 중…" 뒤에 */
+async function sendFromComposer(form, key, logEl) {
+  const input = form.text, text = input.value.trim(), files = (ui.msgFiles || []).slice();
+  if (!text && !files.length) return;
+  input.value = ''; ui.msgDraft[key] = ''; ui.msgFiles = []; const pk = form.querySelector('.msg-picked'); if (pk) pk.innerHTML = ''; msgGrow(input); input.focus();
+  const t0 = Date.now(), isNpc = key.startsWith('npc:');
+  if (logEl) { logEl.querySelector('.empty')?.remove(); logEl.insertAdjacentHTML('beforeend', bubbleHtml({ mine: true, text, ts: t0, attachments: files.map(f => ({ id: '', name: f.name, size: f.size })) }).replace('class="bubble me', 'data-pending class="bubble me') + (isNpc ? '<div class="bubble npc typing" id="chatTyping" aria-label="typing"><i></i><i></i><i></i></div>' : '')); logEl.scrollTop = logEl.scrollHeight; }
+  ui.chatBusy = true;
+  try { if (isNpc) await sendChat(key.slice(4), text, { quiet: true, files }); else await sendRoomMsg(key.slice(5), text, files); }
+  catch (e) { ui.chatBusy = false; $('chatTyping')?.remove(); const p = logEl?.querySelector('[data-pending] small'); if (p) p.textContent = 'Not sent — try again'; input.value = text; ui.msgFiles = files; throw e; }
+  if (isNpc) { const wait = Math.max(0, 400 + Math.min(700, text.length * 8) - (Date.now() - t0)); if (wait) await new Promise(r => setTimeout(r, wait)); }
+  ui.chatBusy = false;
+  markRead(key); msgRefresh();
 }
 
 /* Email */
@@ -5355,6 +5638,7 @@ const PAGES = {
   mail: { title: 'worqend Email', label: 'Email', ico: '✉', group: 'Workspace', render: pageMail, action: () => project() && { label: '✎ Compose', act: 'compose' } },
   meetings: { title: 'Meetings & Minutes', label: 'Meetings', ico: '☷', group: 'Workspace', render: pageMeetings, action: () => project() && canEditMeeting() && { label: '+ New meeting', act: 'meeting-new' } },
   deliverables: { title: 'Deliverables', label: 'Deliverables', ico: '▧', group: 'Workspace', render: pageDeliverables },
+  messenger: { title: 'Messenger', label: 'Messenger', ico: '💬', group: 'Workspace', render: pageMessenger, badge: () => totalUnread() },
   directory: { title: 'Directory & Contacts', label: 'Directory', ico: '▦', group: 'Workspace', render: pageDirectory },
   wallet: { title: 'Wallet', label: 'Wallet', ico: '₩', group: 'Workspace', when: () => !!project() && (isDirector() || isPM() || !!myWalletKey()), render: pageWallet, action: () => myWalletKey() && { label: '+ Purchase / Spend', act: 'po-new' } },
   report: { title: 'Final Report', label: 'Final Report', ico: '★', group: 'Workspace', when: () => !isDirector(), render: pageReport, badge: () => frRecord(me.id)?.published && !localStorage.getItem('worqend_fr_seen_' + frId(me.id)) ? 'NEW' : 0 },
@@ -5375,21 +5659,21 @@ const MOBILE_TABS = () => [
   { key: 'overview', label: 'Home', ico: '◈' },
   { key: 'mail', label: 'Mail', ico: '✉', badge: () => project() ? inbox().length : 0 },
   isDirector() ? { key: 'director', label: 'Director', ico: '◎' } : isCoord() ? { key: 'inbox', label: 'Inbox', ico: '⇄', badge: () => pitems().filter(i => i.status === 'Submitted' && i.kind !== 'director_report').length } : isPM() ? { key: 'pm', label: 'PM', ico: '★', badge: () => pmQueue().length } : { key: 'mywork', label: 'My Work', ico: '◉' },
-  { key: 'meetings', label: 'Meetings', ico: '☷' },
+  { key: 'messenger', label: 'Chat', ico: '💬', badge: () => totalUnread() },
   { key: 'more', label: 'Menu', ico: '≡' }
 ];
 
 /* ── Navigation: groups · search · collapse ────────────── */
 const NAV_GROUPS = [['Workspace', 'Workspace'], ['Leadership', 'Leadership'], ['Program', 'Program Admin'], ['Recruiting', 'Recruiting & CRM']];
 const NAV_KW = {
-  overview: 'home project dashboard', mywork: 'my role mission tasks', timeline: 'week schedule', mail: 'inbox email', meetings: 'minutes agenda',
+  messenger: 'chat message dm group team talk', overview: 'home project dashboard', mywork: 'my role mission tasks', timeline: 'week schedule', mail: 'inbox email', meetings: 'minutes agenda',
   deliverables: 'files submit', finalreports: 'final report publish pdf',  directory: 'contacts team org chart', wallet: 'budget money', report: 'pdf final',
   inbox: 'coordinator approval report', pm: 'approve decide dashboard', director: 'review evaluate', projects: 'import excel builder', scenario: 'events contacts',
   accounts: 'users password', applicants: 'applications', crm: 'leads contacts', lpsettings: 'landing homepage fee faq'
 };
 const NAV_COLLAPSE_KEY = 'worqend_nav_collapsed_v1';
 function navCollapsed() { try { const v = JSON.parse(localStorage.getItem(NAV_COLLAPSE_KEY) || 'null'); return new Set(v || ['Leadership', 'Program', 'Recruiting']); } catch (_) { return new Set(); } }
-const NAV_ORDER = ['overview', 'mywork', 'mail', 'meetings', 'timeline', 'deliverables', 'directory', 'wallet', 'report', 'inbox', 'pm', 'director', 'finalreports', 'projects', 'scenario', 'accounts', 'applicants', 'crm', 'lpsettings'];
+const NAV_ORDER = ['overview', 'mywork', 'mail', 'messenger', 'meetings', 'timeline', 'deliverables', 'directory', 'wallet', 'report', 'inbox', 'pm', 'director', 'finalreports', 'projects', 'scenario', 'accounts', 'applicants', 'crm', 'lpsettings'];
 const navRank = k => { const i = NAV_ORDER.indexOf(k); return i < 0 ? 99 : i; };
 function navItems() { return Object.entries(PAGES).filter(([, p]) => p.group && !p.mobileOnly && (!p.when || p.when())).sort((a, b) => navRank(a[0]) - navRank(b[0])); }
 function navMatch(k, p, q) { if (!q) return true; q = q.toLowerCase().replace(/\s+/g, ''); return [p.label, p.title, NAV_KW[k] || '', k].join(' ').toLowerCase().replace(/\s+/g, '').includes(q); }
@@ -5456,7 +5740,7 @@ function render(scrollTop = true) {
   if (!me) return;
   let page = PAGES[ui.tab];
   if (!page || (page.when && !page.when()) || (page.mobileOnly && VIEW !== 'mobile')) { ui.tab = 'overview'; page = PAGES.overview; }
-  Shell.chrome(ui.tab, page);
+  Shell.chrome(ui.tab, page); msgPollLoop();
   try { $('content').innerHTML = page.render(); } catch (e) { console.error(e); $('content').innerHTML = notice('Something went wrong while drawing this page: ' + esc(e.message)); }
   if (scrollTop) window.scrollTo(0, 0);
 }
@@ -5469,6 +5753,7 @@ function showApp() { showScreen('app'); document.title = VIEW === 'mobile' ? 'Wo
 hooks.status = t => { const el = $('syncState'); if (el) el.textContent = t; };
 hooks.changed = () => {
   render(false);
+  msgPollLoop();
   if (ui.chatWith && $('chatLog') && !ui.chatBusy) { $('chatLog').innerHTML = renderChatLog(ui.chatWith); $('chatLog').scrollTop = $('chatLog').scrollHeight; }
 };
 hooks.signedOut = () => { Overlay.close(); closeDialog(); ui.apps = null; $('loginPw').value = ''; if (location.hash !== '#login') location.hash = 'login'; showLogin(); };
@@ -5512,6 +5797,20 @@ const ACTIONS = {
   'assess-view': d => openAssessmentRecord(d.id),
   /* chat */
   'chat-open': d => openChat(d.npc),
+  'msg-open': d => { ui.msgNew = null; ui.msgKey = d.key; ui.msgFiles = []; if (ui.tab !== 'messenger') return navigate('messenger'); render(false); },
+  'msg-goto': d => { Overlay.close(); ui.msgNew = null; ui.msgKey = d.key; navigate('messenger'); },
+  'msg-back': () => { ui.msgKey = null; ui.msgNew = null; render(false); },
+  'msg-new': d => { ui.msgNew = d.mode; ui.msgKey = null; render(false); },
+  'msg-new-cancel': () => { ui.msgNew = null; render(false); },
+  'msg-dm': async d => { const r = await openDm(d.id); ui.msgNew = null; ui.msgKey = 'room:' + r.id; if (ui.tab !== 'messenger') return navigate('messenger'); render(false); },
+  'msg-dm-go': async d => { const r = await openDm(d.id); Overlay.close(); ui.msgNew = null; ui.msgKey = 'room:' + r.id; navigate('messenger'); },
+  'msgfile-remove': d => { ui.msgFiles.splice(Number(d.i), 1); const pk = $('msgPicked'); if (pk) pk.innerHTML = pickedHtml(); },
+  'npcmsg-del': d => confirmBox('Delete this message from your chat history?', async () => { await deleteNpcChatMsg(d.id); msgRefresh(); }, 'Delete'),
+  'roommsg-del': d => confirmBox('Delete this message for everyone?', async () => { await unsendRoomMsg(d.id); msgRefresh(); }, 'Delete'),
+  'msg-clear': d => confirmBox(d.key.startsWith('npc:') ? 'Delete this whole chat? Your messages and the replies will be removed from Messenger and Directory.' : 'Delete this chat from your Messenger? The other people keep their copy.', async () => { if (d.key.startsWith('npc:')) await clearNpcChat(d.key.slice(4)); else await clearRoomForMe(d.key.slice(5)); ui.msgKey = null; render(false); }, 'Delete chat'),
+  'grp-add': d => { ui.msgNew = 'add'; ui.msgAddTo = d.id; render(false); },
+  'grp-leave': d => confirmBox('Leave this group? You will stop getting its messages.', async () => { await leaveGroup(d.id); ui.msgKey = null; render(false); }, 'Leave group'),
+  'grp-del': d => confirmBox('Delete this group for everyone? This cannot be undone.', async () => { await deleteGroupForAll(d.id); ui.msgKey = null; render(false); }, 'Delete group'),
   /* items */
   'item-new': d => openItemForm({ kind: d.kind || 'request' }),
   'item-open': d => openItem(d.id),
@@ -5618,21 +5917,10 @@ const FORMS = {
     if (ui.tab !== 'mail') navigate('mail'); else render(false);
     alertBox(`Email sent.\nRule-based score: ${result.score}/100 · ${result.grade}`);
   },
-  'chat-send': async form => {
-    const input = form.text, t = input.value.trim(); if (!t) return;
-    input.value = ''; input.focus();
-    const npc = form.dataset.npc, log = $('chatLog'), t0 = Date.now();
-    // 내 메시지는 바로 보여 주고, 상대 답장은 "입력 중…" 표시 후 도착
-    if (log) { log.querySelector('.empty')?.remove(); log.insertAdjacentHTML('beforeend', `<div class="bubble me" data-pending><div>${esc(t)}</div><small>${esc(chatTime(t0))}</small></div><div class="bubble npc typing" id="chatTyping" aria-label="typing"><i></i><i></i><i></i></div>`); log.scrollTop = log.scrollHeight; }
-    ui.chatBusy = true;
-    try { await sendChat(npc, t, { quiet: true }); }
-    catch (e) { ui.chatBusy = false; $('chatTyping')?.remove(); const p = log?.querySelector('[data-pending] small'); if (p) p.textContent = 'Not sent — try again'; input.value = t; throw e; }
-    const wait = Math.max(0, 400 + Math.min(700, t.length * 8) - (Date.now() - t0));   // 짧게: 최대 약 1초
-    if (wait) await new Promise(r => setTimeout(r, wait));
-    ui.chatBusy = false;
-    if (ui.chatWith && $('chatLog') && !ui.chatBusy) { $('chatLog').innerHTML = renderChatLog(ui.chatWith); $('chatLog').scrollTop = $('chatLog').scrollHeight; }
-    hooks.changed();
-  },
+  'chat-send': async form => { await sendFromComposer(form, 'npc:' + norm(form.dataset.npc), $('chatLog')); },
+  'msg-send': async form => { await sendFromComposer(form, form.dataset.key, $('msgLog')); },
+  'grp-create': async form => { const ids = [...form.querySelectorAll('[name=m]:checked')].map(x => x.value); const r = await createGroup(form.name.value, ids); ui.msgNew = null; ui.msgKey = 'room:' + r.id; render(false); },
+  'grp-add': async form => { const ids = [...form.querySelectorAll('[name=m]:checked')].map(x => x.value); if (!ids.length) throw Error('Choose at least one person.'); await addGroupMembers(form.dataset.id, ids); ui.msgNew = null; render(false); },
   'item-save': async (form, submitter) => { const f = formData(form); await saveItem(f, submitter?.value === 'submit', form.dataset.id || null); Overlay.close(); },
   'item-act': async (form, submitter) => { await transitionItem(form.dataset.id, submitter?.value, form.note.value); Overlay.close(); },
   'deliv-save': async (form, submitter) => {
@@ -5719,6 +6007,12 @@ const FORMS = {
 
 const CHANGES = {
   'crm-tag': el => { ui.crmTag = el.value; render(false); },
+  'msg-files': el => {
+    const add = [...el.files]; el.value = '';
+    const form = el.closest('form'), err = form?.querySelector('[data-error]'); if (err) err.textContent = '';
+    for (const f of add) { if (ui.msgFiles.length >= MAX_ATTACH) { if (err) err.textContent = `You can attach up to ${MAX_ATTACH} files.`; break; } if (f.size > CONFIG.MAX_UPLOAD) { if (err) err.textContent = `"${f.name}" is over 2 MB and can’t be attached.`; continue; } ui.msgFiles.push(f); }
+    const pk = form?.querySelector('.msg-picked'); if (pk) pk.innerHTML = pickedHtml();
+  },
   'compose-files': el => {
     const cur = ui.compose.files, add = [...el.files]; el.value = '';
     const err = $('overlayBody').querySelector('[data-error]'); if (err) err.textContent = '';
@@ -5758,6 +6052,15 @@ function bindEvents() {
   });
   document.addEventListener('change', async e => { const el = e.target.closest('[data-change]'); if (!el) return; try { await CHANGES[el.dataset.change]?.(el); } catch (err) { reportError(err); } });
   document.addEventListener('input', e => { if (e.target.dataset?.crmSearch != null) crmFilterDom(e.target.value); });
+  document.addEventListener('input', e => {
+    const t = e.target;
+    if (t.dataset?.msgSearch != null) { ui.msgQ = t.value; const l = $('msgList'); if (l) l.innerHTML = msgListHtml(); }
+    if (t.dataset?.msgInput != null) { msgGrow(t); const k = t.form?.dataset.key; if (k) ui.msgDraft[k] = t.value; }
+  });
+  document.addEventListener('keydown', e => {
+    const t = e.target;
+    if (t.dataset?.msgInput != null && e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); t.form?.requestSubmit(); }
+  });
   document.addEventListener('input', e => { if (e.target.id === 'navSearch') navFilter(e.target.value); if (e.target.id === 'moreSearch') moreFilter(e.target.value); });
   document.addEventListener('keydown', e => {
     if ((e.target.id === 'navSearch' || e.target.id === 'moreSearch') && e.key === 'Enter') { e.preventDefault(); const b = document.querySelector(e.target.id === 'navSearch' ? '#nav [data-tab]:not([hidden])' : '#moreList [data-more-item]:not([hidden]) [data-act="nav"], #moreList [data-more-item]:not([hidden])[data-act="nav"]'); if (b) { e.target.value = ''; navigate(b.dataset.tab); } }
