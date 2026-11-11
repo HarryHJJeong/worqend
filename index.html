@@ -145,6 +145,7 @@ table.mini td{font-size:12px;padding:6px}
 /* chat */
 .chat{height:380px;overflow:auto;background:#f6f8f5;border-radius:12px;padding:12px;margin:10px 0;display:flex;flex-direction:column;gap:8px}
 .bubble{max-width:78%;padding:9px 12px;border-radius:14px;line-height:1.55;font-size:13.5px}.bubble small{display:block;font-size:10px;opacity:.6;margin-top:3px}.bubble.me{align-self:flex-end;background:var(--green);color:white;border-bottom-right-radius:4px}.bubble.npc{align-self:flex-start;background:white;border:1px solid var(--line);border-bottom-left-radius:4px}
+.bubble.typing{display:flex;gap:4px;align-items:center;padding:12px 14px;width:auto}.bubble.typing i{width:7px;height:7px;border-radius:50%;background:#9aa29e;display:block;animation:wqTyping 1s infinite ease-in-out}.bubble.typing i:nth-child(2){animation-delay:.15s}.bubble.typing i:nth-child(3){animation-delay:.3s}@keyframes wqTyping{0%,60%,100%{opacity:.35;transform:translateY(0)}30%{opacity:1;transform:translateY(-3px)}}
 .chat-form{display:flex;gap:8px}.chat-form input{flex:1;border:1px solid #dbe3dd;border-radius:10px;padding:10px}
 /* dropzone */
 .dropzone{display:flex;flex-direction:column;align-items:center;gap:6px;border:2px dashed #b9cdb7;border-radius:16px;padding:34px;background:#f7faf4;cursor:pointer;text-align:center}.dropzone:hover{background:#f0f6ea}.dz-icon{font-size:28px;color:var(--green)}
@@ -378,6 +379,7 @@ table.mini{min-width:0}table.mini td{font-size:12px;padding:6px 4px}.matrix td,.
 /* chat */
 .chat{height:52vh;overflow:auto;background:#f6f8f5;border-radius:14px;padding:12px;margin:10px 0;display:flex;flex-direction:column;gap:8px}
 .bubble{max-width:82%;padding:9px 12px;border-radius:16px;line-height:1.5;font-size:14.5px}.bubble small{display:block;font-size:10px;opacity:.6;margin-top:3px}.bubble.me{align-self:flex-end;background:var(--green);color:white;border-bottom-right-radius:4px}.bubble.npc{align-self:flex-start;background:white;border:1px solid var(--line);border-bottom-left-radius:4px}
+.bubble.typing{display:flex;gap:4px;align-items:center;padding:12px 14px;width:auto}.bubble.typing i{width:7px;height:7px;border-radius:50%;background:#9aa29e;display:block;animation:wqTyping 1s infinite ease-in-out}.bubble.typing i:nth-child(2){animation-delay:.15s}.bubble.typing i:nth-child(3){animation-delay:.3s}@keyframes wqTyping{0%,60%,100%{opacity:.35;transform:translateY(0)}30%{opacity:1;transform:translateY(-3px)}}
 .chat-form{display:flex;gap:8px}.chat-form input{flex:1;border:1px solid #dbe3dd;border-radius:12px;padding:12px;font-size:16px}
 .dropzone{display:flex;flex-direction:column;align-items:center;gap:6px;border:2px dashed #b9cdb7;border-radius:18px;padding:26px;background:#f7faf4;text-align:center}.dz-icon{font-size:26px;color:var(--green)}
 .me-card{display:flex;gap:12px;align-items:center}.select-inline{margin-top:8px;padding:8px 10px;font-size:14px}
@@ -984,12 +986,12 @@ function npcProjectState(senderId, npcEmail) {
 async function localNpcReply({ npcEmail, subject, body, thread, cc, channel }) {
   const npc = npcConfig(npcEmail), contact = stakeholderByEmail(npcEmail);
   if (!npc || !contact) return [];
-  const sid = `${currentProjectId()}|${norm(npcEmail)}`;
+  const sid = `${currentProjectId()}|${norm(npcEmail)}|${me.id}`;   // 참가자마다 따로 기억 (다른 사람 대화와 섞이지 않음)
   const prev = db.npcstates.find(x => x.id === sid);
   const r = NpcEngine.respond({ npc, contact, message: { subject, body }, state: prev?.state, projectState: npcProjectState(me.id, npcEmail), senderName: me.name, channel });
   const delay = Number(npc.replyDelayMinutes ?? project()?.npcSettings?.replyDelayMinutes ?? 0) * 60000;
   const now = Date.now();
-  const ops = [{ op: 'put', c: 'npcstates', r: { id: sid, projectId: currentProjectId(), npc: norm(npcEmail), state: r.state, updated: now } }];
+  const ops = [{ op: 'put', c: 'npcstates', r: { id: sid, projectId: currentProjectId(), npc: norm(npcEmail), userId: me.id, state: r.state, updated: now } }];
   if (channel === 'chat') ops.push({ op: 'put', c: 'chats', r: { id: uid(), projectId: currentProjectId(), npc: norm(npcEmail), userId: me.id, from: 'npc', text: r.body, ts: now + 1, deliverAt: now + delay, log: r.log } });
   else ops.push({ op: 'put', c: 'mails', r: { id: uid(), projectId: currentProjectId(), thread, from: norm(npcEmail), to: me.email, cc: (cc || []).filter(e => accounts().some(a => norm(a.email) === e)), subject: 'Re: ' + subject.replace(/^Re:\s*/i, ''), body: r.body, ts: now + 1, deliverAt: now + delay, npcReply: true, npcLog: r.log } });
   return ops;
@@ -1028,15 +1030,27 @@ async function setMailDeleted(id, mode) {
 
 /* NPC chat */
 const chatThread = npcEmail => db.chats.filter(c => inProject(c) && c.userId === me.id && c.npc === norm(npcEmail) && (c.deliverAt || c.ts) <= Date.now()).sort((a, b) => a.ts - b.ts);
-async function sendChat(npcEmail, text) {
-  text = String(text || '').trim(); if (!text) return;
+/** 채팅 보내기 — 서버 왕복 1번으로 내 메시지 저장 + 답장 생성 (전체 sync 없이 바로 반영) */
+async function sendChat(npcEmail, text, { quiet } = {}) {
+  text = String(text || '').trim().slice(0, 2000); if (!text) return null;
   if (!stakeholderByEmail(npcEmail)) throw Error('Contact not found.');
   const now = Date.now(), pid = currentProjectId();
   const msg = { id: uid(), projectId: pid, npc: norm(npcEmail), userId: me.id, from: 'user', text, ts: now };
-  if (Store.mode === 'remote') { await Store.write([{ op: 'put', c: 'chats', r: msg }]); await Store.call({ action: 'npc.chat', projectId: pid, chatId: msg.id, senderId: me.id, senderName: me.name, week: week() }); await sync(); hooks.changed(); }
-  else await commit([{ op: 'put', c: 'chats', r: msg }, ...await localNpcReply({ npcEmail, subject: '', body: text, channel: 'chat' })]);
+  const upsert = recs => { for (const r of recs || []) { const i = db.chats.findIndex(x => x.id === r.id); if (i >= 0) db.chats[i] = r; else db.chats.push(r); } };
+  if (Store.mode === 'remote') {
+    let res = null;
+    try { res = await Store.call({ action: 'npc.chat', projectId: pid, message: msg, senderId: me.id, senderName: me.name, week: week() }); } catch (e) { if (!/Message not found/i.test(e.message)) throw e; }
+    if (res && res.records) upsert(res.records);
+    else { await Store.write([{ op: 'put', c: 'chats', r: msg }]); await Store.call({ action: 'npc.chat', projectId: pid, chatId: msg.id, senderId: me.id, senderName: me.name, week: week() }); await sync(); }   // 이전 버전 Code.gs
+  } else {
+    const ops = [{ op: 'put', c: 'chats', r: msg }, ...await localNpcReply({ npcEmail, subject: '', body: text, channel: 'chat' })];
+    await Store.write(ops); upsert(ops.filter(o => o.c === 'chats').map(o => o.r));
+    for (const o of ops.filter(o => o.c === 'npcstates')) { const i = db.npcstates.findIndex(x => x.id === o.r.id); if (i >= 0) db.npcstates[i] = o.r; else db.npcstates.push(o.r); }
+  }
+  if (!quiet) hooks.changed();
+  return msg;
 }
-const npcStateOf = email => db.npcstates.find(x => x.id === `${currentProjectId()}|${norm(email)}`)?.state || null;
+const npcStateOf = email => (db.npcstates.find(x => x.id === `${currentProjectId()}|${norm(email)}|${me?.id}`) || db.npcstates.find(x => x.id === `${currentProjectId()}|${norm(email)}`))?.state || null;
 
 /* Email assessment records (규칙 기반 · 서버 연결 시 서버에서 재평가해 저장) */
 function assessmentInput({ to, subject, body, missionId, emailType }) {
@@ -2204,9 +2218,9 @@ const NpcEngine = (function () {
    */
   const TEMPLATES = {
     common: {
-      ack: ['Thank you for the details ({facts}).', 'Noted — {facts}.', 'Thanks for sharing {facts}.'],
+      ack: ['Thank you for the details ({facts}).', 'Noted — {facts}.', 'Thanks for sharing {facts}.', 'Got it: {facts}.', 'Thanks — that helps ({facts}).', 'Understood, {facts}.'],
       repeatLead: ['As mentioned in my previous email,', 'Just to recap what I shared earlier,', 'To confirm my earlier reply,'],
-      thanks: ['Thank you for your reply. Please let us know if you need anything else.', 'Thanks — we are happy to help with anything else.', 'Thank you. We look forward to working with you.']
+      thanks: ['Thank you for your reply. Please let us know if you need anything else.', 'Thanks — we are happy to help with anything else.', 'Thank you. We look forward to working with you.', 'You are very welcome!', 'My pleasure — just let me know if anything else comes up.', 'Anytime. Good luck with the project!']
     },
     supplier: {
       askQuote: ['To prepare an accurate quotation, could you confirm {missingList}?', 'Before we quote, could you let us know {missingList}?'],
@@ -2217,7 +2231,7 @@ const NpcEngine = (function () {
       lead: ['Our standard lead time is {leadWeeks} weeks from order confirmation.', 'Production and delivery take about {leadWeeks} weeks after we confirm the order.'],
       leadDateOk: 'Delivery by {wantedDate} is possible if we receive the confirmed order by {orderBy}.',
       leadDateNo: 'Unfortunately, delivery by {wantedDate} is not possible. The earliest delivery is about {earliest} ({leadWeeks} weeks after order confirmation).',
-      discountOffer: 'For an order of {threshold} units or more, we can offer a {discountPct}% discount: KRW {discountedUnit} per unit (total KRW {discountedTotal} for {qtyForDiscount} units).',
+      discountOffer: 'For an order of {threshold} units or more, we can offer {discountPct}% off: KRW {discountedUnit} per unit (total KRW {discountedTotal} for {qtyForDiscount} units).',
       discountBelow: 'Our volume discount starts at {threshold} units. For {qty} units, the standard price of KRW {unitPrice} applies.',
       discountNotYet: 'At this stage we are not able to offer a discount on our standard price.',
       discountNone: 'We are not able to offer a discount on this item. {alternative}',
@@ -2297,7 +2311,7 @@ const NpcEngine = (function () {
     function mk(mo, day) { const d = new Date(base.getFullYear(), mo, day); if (d < new Date(base.getFullYear(), base.getMonth(), base.getDate())) d.setFullYear(d.getFullYear() + 1); return isNaN(d) ? null : d.getTime(); }
   }
 
-  function extractEntities(message, now) {
+  function extractEntities(message, now, npc) {
     const t = String(message || '').replace(/[‘’]/g, "'");
     const base = now ? new Date(now) : new Date();
     const e = { quantities: [], prices: [], percents: [], dates: [], variant: null, finish: null, budget: null, product: null, suppliers: [], orders: null, ordersPer: null, launchDate: null, objective: null, target: null, stock: null };
@@ -2305,7 +2319,7 @@ const NpcEngine = (function () {
     // orders (logistics volume) — "30 orders per day", "30 tumbler orders", "orders of 30 a day"
     const reOrders = /(\d[\d,]*)\s*(?:tumbler\s+|customer\s+|online\s+)?orders?\b(?:\s*(?:per|a|each|every)\s*(day|week|month))?|(\d[\d,]*)\s*(?:orders?)?\s*(?:per|a)\s*(day|week|month)\b/i;
     if ((m = t.match(reOrders))) { e.orders = toNum(m[1] || m[3]); e.ordersPer = (m[2] || m[4] || '').toLowerCase() || null; if (/\bdaily\b/i.test(t) && !e.ordersPer) e.ordersPer = 'day'; if (/\bmonthly\b/i.test(t) && !e.ordersPer) e.ordersPer = 'month'; }
-    const reQ = new RegExp(`${NUM}[\\s-]?(?:units?|pcs|pieces?|pc|ea|tumblers?|bottles?|sets?)\\b(?!\\s*orders?)|\\b(?:quantity of|qty\\.?|order of|orders? for|batch of|stock of)\\s?${NUM}`, 'gi');
+    const reQ = new RegExp(`${NUM}[\\s-]?(?:(?!orders?\\b)[A-Za-z][\\w-]*\\s+){0,2}?(?:units?|pcs|pieces?|pc|ea|tumblers?|bottles?|sets?|lamps?|kits?|people|persons?|employees?|staff|participants?|attendees?|guests?|seats?|licen[cs]es?|members?|rooms?|room nights?|nights?|boxes|meals?|vouchers?|travell?ers?|passengers?|participant-days|person-days)\\b(?!\\s*orders?)|\\b(?:quantity of|qty\\.?|order of|orders? for|batch of|stock of)\\s?${NUM}`, 'gi');
     while ((m = reQ.exec(t))) { const v = m[1] ? toNum(m[1], m[2]) : toNum(m[3], m[4]); if (v != null && !negated(t, m.index)) e.quantities.push(v); }
     const reP = new RegExp(`(?:krw|₩)\\s?${NUM}(\\s?(?:million|m)\\b)?|${NUM}(\\s?(?:million|m)\\b)?\\s?(?:krw|won|원)`, 'gi');
     while ((m = reP.exec(t))) { let v = m[1] ? toNum(m[1], m[2]) : toNum(m[4], m[5]); if ((m[3] || m[6])) v *= 1000000; if (v != null) e.prices.push({ value: v, index: m.index }); }
@@ -2313,11 +2327,17 @@ const NpcEngine = (function () {
     while ((m = rePct.exec(t))) e.percents.push(toNum(m[1]));
     const budgetM = t.match(new RegExp(`budget[^.?!\\d₩]{0,30}(?:krw|₩)?\\s?${NUM}(\\s?(?:million|m)\\b)?`, 'i')) || t.match(new RegExp(`(?:krw|₩)\\s?${NUM}(\\s?(?:million|m)\\b)?[^.?!]{0,30}budget`, 'i'));
     if (budgetM) { let v = toNum(budgetM[1], budgetM[2]); if (budgetM[3]) v *= 1000000; e.budget = v; }
-    if (/\b900\s?ml\b|\boutdoor\b/i.test(t)) e.variant = '900 ml'; else if (/\b500\s?ml\b|\blightweight\b|\bcommuter\b/i.test(t)) e.variant = '500 ml';
-    if (/\bpremium( coating| finish)?\b|\bcoating\b/i.test(t)) e.finish = 'premium coating'; else if (/\bmatte\b|\bstandard finish\b/i.test(t)) e.finish = 'matte';
+    const keyHit = obj => { const ks = Object.keys(obj || {}).sort((a, b) => b.length - a.length); return ks.find(k => new RegExp(`\\b${k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s?')}\\b`, 'i').test(t)) || null; };
+    const custom = npc && npc.variants && !('500 ml' in npc.variants);
+    if (custom) e.variant = keyHit(npc.variants);
+    else if (/\b900\s?ml\b|\boutdoor\b/i.test(t)) e.variant = '900 ml'; else if (/\b500\s?ml\b|\blightweight\b|\bcommuter\b/i.test(t)) e.variant = '500 ml';
+    if (npc && npc.finishes && !('premium coating' in npc.finishes)) e.finish = keyHit(npc.finishes);
+    else if (custom && !npc.finishes) e.finish = null;
+    else if (/\bpremium( coating| finish)?\b|\bcoating\b/i.test(t)) e.finish = 'premium coating'; else if (/\bmatte\b|\bstandard finish\b/i.test(t)) e.finish = 'matte';
+    if (npc && npc.opinions && !('500 ml' in npc.opinions)) { e.opinionKeys = Object.keys(npc.opinions).filter(k => k !== 'general' && keyHit({ [k]: 1 })); if (!e.variant) e.variant = e.opinionKeys[0] || null; }
     if (/\btumblers?\b/i.test(t)) e.product = 'tumbler';
     if (/\b(brand )?awareness\b|\bbrand reach\b/i.test(t)) e.objective = 'awareness'; else if (/\b(direct )?sales\b|\bconversions?\b|\bpurchases\b/i.test(t) && /\b(goal|objective|focus|aim|drive|increase)\b/i.test(t)) e.objective = 'direct sales';
-    const tg = t.match(/\b(office workers|commuters|campers|students|parents|young professionals|people in their (?:20s|30s)|(?:20s|30s) (?:women|men)|hikers)\b/i); if (tg) e.target = tg[1].toLowerCase();
+    const tg = t.match(/\b(office workers|remote workers|home workers|freelancers|commuters|campers|students|parents|young professionals|people in their (?:20s|30s)|(?:20s|30s) (?:women|men)|hikers)\b/i); if (tg) e.target = tg[1].toLowerCase();
     const st = t.match(/\bstock (?:of )?(\d[\d,]*)\b|\b(\d[\d,]*) (?:units )?in stock\b/i); if (st) e.stock = toNum(st[1] || st[2]);
     const lm = t.match(new RegExp(`launch(?:ing)?(?:\\s+date)?(?:\\s+(?:is|will be|would be|on|planned for|scheduled for|of))*\\s*[^.?!\\d]{0,12}((?:\\d{1,2}(?:st|nd|rd|th)?\\s+(?:of\\s+)?${MONTH_RE})|(?:${MONTH_RE}\\s+\\d{1,2})|(?:\\d{1,2}[\\/.]\\d{1,2}))`, 'i'));
     if (lm) e.launchDate = parseDateText(lm[1], base);
@@ -2355,11 +2375,128 @@ const NpcEngine = (function () {
     if (found.includes('order') && found.includes('quotation') && /\b(confirm|place|proceed|go ahead|book)\b/i.test(t)) found = found.filter(i => i !== 'quotation');
     // 할인 요청이면 견적 의도는 할인 응답에 포함
     if (found.includes('discount') && (kind === 'logistics' || kind === 'channel' || kind === 'agency')) found = found.filter(i => i !== 'quotation' || kind === 'logistics');
+    if (found.includes('complaint') && /\b(late|delayed) (reply|response|answer)\b|sorry (for|about) (the|my) (late|delay)/i.test(t) && !/\b(damaged?|defect\w*|broken|wrong (item|color|colour)|disappointed|not happy|complain\w*)\b/i.test(t)) found = found.filter(i => i !== 'complaint');
     return found.length ? [...new Set(found)] : ['unknown'];
+  }
+
+
+  /* ── Conversation layer: small talk, follow-ups and context-aware fallbacks (사람처럼 자연스럽게) ── */
+  const SOCIAL = {
+    howAreYou: /\b(how are you|how're you|how are things|how's it going|how is it going|how have you been|how is your (day|week)|how was your (day|week|weekend)|hope (you'?re|you are|this (email |message )?finds you|all is) (well|doing well|good))\b/i,
+    greeting: /^\s*(hi|hello|hey|good (morning|afternoon|evening)|dear|greetings)\b/i,
+    apology: /\b(sorry|apologi[sz]e|my apologies|my bad)\b/i,
+    followUp: /\b(any (update|news)s?|following up|follow(ing)? up on|just checking|checking in|did you (get|receive|see)|have you had a chance|still waiting|haven'?t heard)\b/i,
+    bye: /\b(bye|goodbye|talk (to you )?soon|speak soon|see you|have a (good|great|nice|lovely) (day|weekend|week|evening|one)|catch you later|take care)\b/i,
+    ack: /^\s*(ok(ay)?|sure|got it|noted|great|perfect|sounds (good|great)|alright|all right|understood|cool|fine|that works|that'?s (great|fine|good|helpful)|good|nice|wonderful|excellent|i see|makes sense|awesome|thanks?( you)?[.!]*$)/i,
+    agree: /^\s*(yes|yeah|yep|yup|correct|exactly|right|absolutely|definitely|of course|agreed)\b/i,
+    disagree: /^\s*(no|nope|not really|i don'?t think so|not yet|not now)\b/i,
+    who: /\b(who are you|who is this|what (does your company|do you) do|tell me (more )?about (your company|yourself|you)|introduce yourself|what is your (role|job))\b/i,
+    wait: /\b(let me (check|think|ask|get back)|i('ll| will) (check|get back|confirm|let you know|ask)|give me (a (moment|minute|sec|second)|some time)|one (moment|sec))\b/i,
+    help: /\b(can you help|could you help|i need (some )?help|what can you (do|help))\b/i
+  };
+  const SOCIAL_TPL = {
+    howAreYou: { formal: ['I am doing well, thank you for asking.', 'Very well, thank you — I hope you are too.', 'All good here, thank you. It has been a busy week on our side!', 'Thank you, I am well. I hope your week is going smoothly.'],
+                 casual: ['I’m good, thanks! Hope you’re doing well too.', 'Doing great, thanks for asking!', 'Pretty good — busy week, but good!', 'All good here, thanks! 😊'] },
+    apology: { formal: ['No problem at all.', 'Not at all — thank you for letting me know.', 'No need to apologise.'], casual: ['No worries at all!', 'All good, don’t worry about it.', 'No problem!'] },
+    greeting: { formal: ['Hello {first}, nice to hear from you. How can I help you today?', 'Hi {first}, thank you for getting in touch. What can I do for you?', 'Good to hear from you, {first}. What would you like to discuss?', 'Hello {first}! What can I help you with?'],
+                casual: ['Hey {first}! What’s up?', 'Hi {first}! Good to hear from you. What can I do for you?', 'Hello! How can I help?', 'Hi there! What would you like to talk about?'] },
+    bye: { formal: ['Thank you, {first}. Have a great day!', 'Thank you — speak soon.', 'It was a pleasure. Have a good weekend!', 'Thank you, and please let me know if anything comes up.'],
+           casual: ['Bye for now — talk soon!', 'Thanks, have a great one!', 'See you! Let me know if you need anything else.', 'Take care!'] },
+    wait: { formal: ['Of course, please take your time.', 'Certainly. I will wait for your update.', 'No rush — just let me know when you are ready.'], casual: ['Sure, take your time!', 'No rush — I’ll be here.', 'Of course. Just ping me when you’re ready.'] },
+    disagree: { formal: ['I understand. What would work better for you?', 'Noted. Could you tell me what you have in mind, and I will see what we can do?', 'That is fine. What would you prefer instead?'],
+                casual: ['Okay, no problem. What would work better?', 'Got it. What are you thinking instead?', 'Fair enough — tell me what you have in mind.'] },
+    help: { formal: ['Of course. What do you need help with?', 'I would be happy to help. What would you like to know?'], casual: ['Sure! What do you need?', 'Happy to help — what’s up?'] },
+    clarifyMine: { formal: ['Sorry for the confusion. To put it simply: {lastPoint}', 'Let me rephrase: {lastPoint}', 'Apologies if that was unclear. What I meant is: {lastPoint}'],
+                   casual: ['Sorry, I wasn’t clear! What I meant: {lastPoint}', 'Let me say it another way: {lastPoint}', 'Oops, let me explain — {lastPoint}'] }
+  };
+  const KIND_INTRO = {
+    supplier: 'I can help you with quotations, timing, samples and orders.',
+    logistics: 'We handle packaging, storage and delivery to your customers.',
+    agency: 'Our team plans and runs online ad campaigns for brands like yours.',
+    channel: 'I look after partner brands that sell on our platform.',
+    customer: 'I’m one of the people you asked for feedback — happy to give you my honest opinion.'
+  };
+  const KIND_OPEN = {
+    supplier: ['What would you like to know first — price, timing or something else?', 'Is there anything you would like us to quote or check for you?', 'Just let me know what you need, and I will get back to you quickly.'],
+    logistics: ['Would you like an estimate, or should we check capacity for your dates?', 'Let me know your volumes and dates, and I will check for you.'],
+    agency: ['Shall we talk about the budget and goal next?', 'When you are ready, send me your budget and target customer and we will draft a plan.'],
+    channel: ['Would you like to start the listing process?', 'Let me know if you have any questions about fees or the listing.'],
+    customer: ['Anything else you want to ask me?', 'Happy to help — anything else?', 'What else would you like to know?']
+  };
+  function hashStr(s) { let h = 0; for (const c of String(s || '')) h = (h * 31 + c.charCodeAt(0)) >>> 0; return h; }
+  function detectSocial(text) {
+    const t = String(text || '').replace(/[‘’]/g, "'").trim();
+    const words = t.split(/\s+/).filter(Boolean).length;
+    const out = {};
+    for (const [k, re] of Object.entries(SOCIAL)) out[k] = re.test(t);
+    out.short = words <= 8;
+    if (!out.short) { out.ack = false; out.agree = false; out.disagree = false; }
+    return out;
+  }
+  /** 대화 흐름에 맞는 다음 한마디 (상태·기억 기반) */
+  function contextLine(npc, st, social) {
+    const kind = npc.kind || 'supplier', q = st.lastQuote, ord = st.order;
+    const n = v => Number(v || 0).toLocaleString('en-US');
+    const lines = [];
+    if (kind === 'supplier') {
+      if (st.state === 'ORDER_CONFIRMED' && ord) lines.push(`Your order of ${n(ord.qty)} units is on track — I will update you as soon as it is ready.`, `Everything is going to plan with your order of ${n(ord.qty)} units. Is there anything else you need?`);
+      else if (st.state === 'AWAITING_APPROVAL') lines.push('We are holding the quotation for you. As soon as we receive your approved PO, we can confirm the order.', 'Just a reminder: once your internal approval is done, please send the approved PO and we will confirm right away.');
+      else if (st.state === 'NEGOTIATING' && q) lines.push(`We are still open to finding terms that work for both sides. Our latest offer was KRW ${n(q.unit)} per unit for ${n(q.qty)} units — what would you like to propose?`, 'Let me know your final quantity, and we will send a revised quotation.');
+      else if (q) lines.push(`Shall we go ahead with the quotation for ${n(q.qty)} units, or would you like to adjust something first?`, `When you are ready, please send the approved PO for the ${n(q.qty)} units and we will confirm the order.`, `Would you like a sample before you decide on the ${n(q.qty)} units?`);
+    } else if (kind === 'logistics') {
+      if (st.state === 'ORDER_CONFIRMED') lines.push('Your booking is confirmed. We will be ready on launch day.');
+      else if (st.facts && st.facts.orders) lines.push('Shall I reserve warehouse capacity for those volumes?', 'If the numbers look right, I can hold capacity for your launch week.');
+    } else if (kind === 'agency') {
+      if (st.facts && st.facts.budget) lines.push('Shall we finalise the media plan so we can start on time?', 'Once you confirm the plan, we can launch the first ads within three days.');
+    } else if (kind === 'channel') {
+      if (st.state === 'ORDER_CONFIRMED') lines.push('Your listing is ready. Let me know if you need help with images or stock.');
+    }
+    return lines;
+  }
+  function socialReply({ npc, contact, social, intents, st, first, seed, lastCore }) {
+    const style = (npc.style || 'formal') === 'formal' ? 'formal' : 'casual', kind = npc.kind || 'supplier';
+    const P = (key, vars = {}) => { const arr = (npc.templates && npc.templates['social_' + key]) ? [npc.templates['social_' + key]] : SOCIAL_TPL[key][style]; return generateReply(arr, { first, ...vars }, seed); };
+    const ctx = contextLine(npc, st, social);
+    const open = (KIND_OPEN[kind] || KIND_OPEN.supplier);
+    const pickA = arr => arr[seed % arr.length];
+    const out = [];
+    if (intents.includes('clarify')) {
+      const lastPoint = st.lastPoint || null;
+      out.push(lastPoint ? P('clarifyMine', { lastPoint }) : null);
+      if (!lastPoint) out.push(pickA(open));
+      return out.filter(Boolean);
+    }
+    if (social.who) { out.push(`I’m ${contact.name}, ${contact.title}${contact.company ? ' at ' + contact.company : ''}. ${npc.intro || KIND_INTRO[kind] || ''}`.trim()); out.push(ctx.length ? pickA(ctx) : pickA(open)); return out; }
+    if (social.followUp) { out.push(style === 'formal' ? pickA(['Thank you for following up.', 'Thanks for checking in.', 'Good to hear from you again.']) : pickA(['Thanks for checking in!', 'Hey, thanks for the follow-up!'])); out.push(ctx.length ? pickA(ctx) : pickA(['I don’t think anything is pending on my side yet. What would you like me to check?', 'Could you remind me what you need, so I can look into it?'])); return out; }
+    if (social.bye) { out.push(P('bye')); return out; }
+    if (social.wait) { out.push(P('wait')); return out; }
+    if (social.help) { out.push(P('help')); out.push(pickA(open)); return out; }
+    if (social.disagree) { out.push(P('disagree')); return out; }
+    if (social.ack || social.agree) {
+      const lead = style === 'formal' ? pickA(['Great.', 'Perfect.', 'Thank you.', 'Wonderful.', 'Excellent.']) : pickA(['Great!', 'Awesome!', 'Cool!', 'Perfect!', 'Nice!']);
+      out.push(lead + ' ' + (ctx.length ? pickA(ctx) : pickA(open))); return out;
+    }
+    if (social.greeting && social.short && !social.howAreYou) { out.push(P('greeting')); if (ctx.length) out.push(pickA(ctx)); return out; }
+    if (social.howAreYou) { out.push(pickA(open)); return out; }
+    // 알아듣지 못한 말: 처음으로 돌아가지 않고, 지금까지의 흐름을 이어서 묻기
+    const unsure = style === 'formal'
+      ? ['I am not sure I fully understood.', 'Sorry, I may have missed your point.', 'Thank you for your message — I want to make sure I get this right.', 'Could you say a little more about that?']
+      : ['Hmm, I’m not sure I got that.', 'Sorry, could you say that another way?', 'I want to make sure I understand you.', 'Not sure I follow — can you explain a bit more?'];
+    out.push(pickA(unsure));
+    out.push(ctx.length ? pickA(ctx) : pickA(open));
+    return out;
   }
 
   /* ── Template rendering ───────────────────────────── */
   function pick(tpl, turn) { return Array.isArray(tpl) ? tpl[(turn || 0) % tpl.length] : tpl; }
+  /** 텀블러 기본 문구를 프로젝트별 제품·단위로 바꿈 (NPC_Rules: product, unit_label, unit_one) */
+  function localizeReply(text, npc) {
+    let s = String(text || '');
+    if (npc.product) { const pl = npc.productPlural || (/s$/.test(npc.product) ? npc.product : npc.product + 's'); s = s.replace(/\btumblers\b/g, pl).replace(/\btumbler\b/g, npc.product); }
+    if (npc.unitLabel) { const one = npc.unitOne || npc.unitLabel.replace(/s$/, ''); s = s.replace(/\bper unit\b/g, 'per ' + one).replace(/\b(\d[\d,]*) units\b/g, `$1 ${npc.unitLabel}`).replace(/\bunits\b(?! of)/g, npc.unitLabel); }
+    s = s.replace(/\bof the  ?(\w)/g, 'of the $1').replace(/ {2,}/g, ' ');
+    return s;
+  }
   function generateReply(template, variables, turn) {
     const tpl = pick(template, turn);
     if (!tpl) return '';
@@ -2416,7 +2553,7 @@ const NpcEngine = (function () {
     const turn = (state && state.turns) || 0;
     const s = { ...state };
     const f = s.facts || {};
-    const R = (tpl, vars) => generateReply(tpl, vars, turn);
+    const R = (tpl, vars) => generateReply(tpl, vars, turn + (state.seed || 0));
     const blocks = []; let next = s.state || 'INITIAL_CONTACT'; let outcome = null;
     const advance = st => { const order = STATES.indexOf(st), cur = STATES.indexOf(next); if (order > cur || next === 'CLOSED') next = st; };
 
@@ -2431,7 +2568,7 @@ const NpcEngine = (function () {
       if (intent === 'quotation' || intent === 'moq') {
         if (intent === 'moq' && !entities.quantity) { blocks.push(R(T.moqInfo, { moq })); advance('INFORMATION_REQUESTED'); }
         else if (!qty) {
-          const missing = ['the order quantity', !variant && npc.variants ? 'the size (500 ml or 900 ml)' : null, !finish && npc.finishes ? 'the finish (matte or premium coating)' : null].filter(Boolean);
+          const missing = ['the order quantity', !variant && npc.variants ? ('500 ml' in npc.variants ? 'the size (500 ml or 900 ml)' : `the option (${Object.keys(npc.variants).join(' or ')})`) : null, !finish && npc.finishes ? ('premium coating' in npc.finishes ? 'the finish (matte or premium coating)' : `the add-on (${Object.keys(npc.finishes).join(' or ')})`) : null].filter(Boolean);
           blocks.push(R(T.askQuote, { missingList: listText(missing) }));
           if (intent === 'quotation') blocks.push(R(T.moqInfo, { moq }));
           advance('INFORMATION_REQUESTED');
@@ -2573,9 +2710,10 @@ const NpcEngine = (function () {
       if (intent === 'opinion' || intent === 'quotation' || intent === 'discount') {
         const price = entities.price;
         if (price) said.push(R(price > Number(npc.priceLimit) ? T.priceHigh : T.priceOk, { price, priceLimit: Number(npc.priceLimit) }));
-        if (entities.variant && npc.opinions?.[entities.variant]) said.push(npc.opinions[entities.variant]);
+        if (entities.opinionKeys && entities.opinionKeys.length) entities.opinionKeys.slice(0, 3).forEach(k => said.push(npc.opinions[k]));
+        else if (entities.variant && npc.opinions?.[entities.variant]) said.push(npc.opinions[entities.variant]);
         if (entities.finish && npc.opinions?.[entities.finish]) said.push(npc.opinions[entities.finish]);
-        if ((intent === 'discount' || (price && price > Number(npc.priceLimit))) && npc.wouldBuyAt) said.push(R(T.wouldBuyAt, { wouldBuyAt: npc.wouldBuyAt }));
+        if ((intent === 'discount' || (price && price > Number(npc.priceLimit))) && npc.wouldBuyAt) said.push(R(T.wouldBuyAt, { wouldBuyAt: Number(npc.wouldBuyAt) || npc.wouldBuyAt }));
         if (!said.length) said.push(s.lastOpinion ? R(T.repeatOpinion, { lastOpinion: s.lastOpinion.charAt(0).toLowerCase() + s.lastOpinion.slice(1) }) : (npc.opinions?.general || R(T.askPrice, {})));
         blocks.push(...said);
         if (said.length && !/^Like I said/.test(said[0])) s.lastOpinion = said[said.length - 1];
@@ -2591,7 +2729,7 @@ const NpcEngine = (function () {
   /** 전체 처리: 의도 → 정보 → 기억 → 규칙 → 답장 (같은 답장 반복 방지) */
   function respond({ npc, contact, message, state, projectState, senderName, channel }) {
     const text = `${message.subject || ''}\n${message.body || ''}`;
-    const entities = extractEntities(text, projectState.now);
+    const entities = extractEntities(text, projectState.now, npc);
     entities._raw = text;
     const intents = detectIntent(message.body || message.subject || '', { npcKind: npc.kind });
     let st = { state: 'INITIAL_CONTACT', turns: 0, ...(state || {}) };
@@ -2600,13 +2738,30 @@ const NpcEngine = (function () {
     st.facts = mergeFacts(prevFacts, entities);
     delete entities._raw;
     const blocks = []; const outcomes = [];
+    const social = detectSocial(message.body || message.subject || '');
+    const first0 = String(senderName || '').split(/\s+/)[0] || 'there';
+    const seed = ((st.turns || 0) + hashStr(text)) >>> 0;
+    st.seed = seed % 97;
+    const style0 = (npc.style || 'formal') === 'formal' ? 'formal' : 'casual';
+    let biz = intents.filter(i => i !== 'unknown' && i !== 'clarify');
+    // 짧은 이어 묻기: "what about the Pro?", "and 2,000 units?" → 앞의 주제를 이어서 답함
+    if (!biz.length && !intents.includes('clarify')) {
+      const k = npc.kind || 'supplier';
+      if (k === 'customer' && (entities.variant || (entities.opinionKeys || []).length || entities.price)) biz = ['opinion'];
+      else if (k === 'supplier' && (st.lastQuote || prevFacts.qty) && (entities.variant || entities.quantity || entities.finish)) biz = ['quotation'];
+      else if (k === 'supplier' && /\bwhat about|how about|and (for|if)\b/i.test(message.body || '') && entities.quantity) biz = ['quotation'];
+    }
+    if (social.apology && !intents.includes('complaint')) blocks.push(generateReply(SOCIAL_TPL.apology[style0], {}, seed));
+    if (social.howAreYou) blocks.push(generateReply(SOCIAL_TPL.howAreYou[style0], {}, seed));
     const learned = newFactsText(prevFacts, st.facts, npc.kind);
     // 새로 받은 정보가 있으면 먼저 확인해 줌 (고객 페르소나 제외)
     if (learned && npc.kind !== 'customer' && !intents.includes('thanks')) blocks.push(generateReply(TEMPLATES.common.ack, { facts: learned }, st.turns));
-    for (const intent of intents.slice(0, 3)) {
+    if (!biz.length) blocks.push(...socialReply({ npc, contact, social, intents, st, first: first0, seed, lastCore: st.lastCore }));
+    for (const intent of biz.slice(0, 3)) {
       const r = selectScenarioResponse({ npc, intent, entities, projectState, state: st });
       st = { ...r.state, facts: st.facts, turns: st.turns }; blocks.push(...r.blocks); if (r.outcome) outcomes.push(r.outcome);
     }
+    if (social.bye && biz.length === 1 && biz[0] === 'thanks') blocks.push(generateReply(SOCIAL_TPL.bye[style0], { first: first0 }, seed));
     let uniq = [...new Set(blocks)].filter(Boolean);
     // 직전 답장과 내용이 같으면 반복임을 밝히고 다음 단계를 묻기
     const core = uniq.join(' ');
@@ -2614,6 +2769,9 @@ const NpcEngine = (function () {
       const lead = generateReply(TEMPLATES.common.repeatLead, {}, st.turns);
       uniq = [lead + ' ' + uniq[0].charAt(0).toLowerCase() + uniq[0].slice(1), ...uniq.slice(1), 'Is there anything specific you would like us to change or add so we can move forward?'];
     }
+    uniq = uniq.map(b => localizeReply(b, npc));
+    const point = uniq.filter(b => b.length > 30 && !/^(I am not sure|Sorry|Hmm|Thank you for your message|Could you say|I want to make sure|Not sure I|Apologies if|Let me rephrase|Sorry for the confusion|Oops)/.test(b)).pop();
+    if (point) st.lastPoint = point.replace(/^(Great|Perfect|Thank you|Wonderful|Excellent|Awesome|Cool|Nice)[.!]\s+/, '');
     st.lastCore = core;
     st.turns = (st.turns || 0) + 1;
     const first = String(senderName || '').split(/\s+/)[0] || 'there';
@@ -2626,7 +2784,7 @@ const NpcEngine = (function () {
     return { intents, entities, body, state: st, outcomes, log };
   }
 
-  return { STATES, INTENTS, TEMPLATES, detectIntent, extractEntities, selectScenarioResponse, generateReply, respond };
+  return { STATES, INTENTS, TEMPLATES, SOCIAL, detectSocial, detectIntent, extractEntities, selectScenarioResponse, generateReply, respond };
 })();
 /* ═══ END NPC ENGINE ═══ */
 /* ═════════════════════════════════════════════════════════════
@@ -2976,7 +3134,7 @@ function buildProjectFromSheets(sheets, fileName = '') {
     else if (kl === 'template') (n.templates = n.templates || {})[sub] = r.value;
     else if (NPC_NUMERIC.includes(kl)) { if (r.value === '' || isNaN(num)) err('NPC_Rules', r._row, `${key} must be a number.`); else n[camel(kl)] = num; }
     else if (kl === 'kind') { if (!NPC_KINDS.includes(norm(r.value))) err('NPC_Rules', r._row, `kind must be one of ${NPC_KINDS.join(' / ')}`); n.kind = norm(r.value); }
-    else n[camel(kl)] = r.value;
+    else { const raw = String(r.value ?? '').trim(); let val = r.value; if (/^[\[{]/.test(raw)) { try { val = JSON.parse(raw); } catch (_) {} } n[camel(kl)] = val; }
   }
   for (const n of Object.values(npcs)) if (n.discountRate > 1) n.discountRate = n.discountRate / 100;
   for (const s of stakeholders) if (!npcs[s.email]) warn('NPC_Rules', 0, `${s.email} has no reply rules. It will receive emails without replying.`);
@@ -3045,7 +3203,7 @@ function npcRows(npcs) {
   for (const [email, n] of Object.entries(npcs)) for (const [k, v] of Object.entries(n)) {
     if (k === 'variants' || k === 'finishes' || k === 'opinions' || k === 'templates') for (const [sk, sv] of Object.entries(v || {})) rows.push([email, `${{ variants: 'variant', finishes: 'finish', opinions: 'opinion', templates: 'template' }[k]}:${sk}`, sv]);
     else if (k === 'results') (v || []).forEach(r => rows.push([email, `result:${r.fromWeek}`, r.text]));
-    else if (v != null) rows.push([email, snake(k), v]);
+    else if (v != null) rows.push([email, snake(k), typeof v === 'object' ? JSON.stringify(v) : v]);
   }
   return rows;
 }
@@ -4454,9 +4612,10 @@ function openChat(npcEmail) {
   Overlay.open(`Chat · ${s.name}`, `<div class="tiny muted">${esc(s.title)} · ${esc(s.company)} — simulated, rule-based replies</div><div class="chat" id="chatLog">${renderChatLog(npcEmail)}</div><form data-form="chat-send" data-npc="${esc(npcEmail)}" class="chat-form"><input name="text" autocomplete="off" placeholder="Write in English…" required><button class="btn primary">Send</button></form>`);
   const log = $('chatLog'); if (log) log.scrollTop = log.scrollHeight;
 }
+const chatTime = ts => { const d = new Date(ts), t = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }); return d.toDateString() === new Date().toDateString() ? t : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ', ' + t; };
 function renderChatLog(npcEmail) {
   const msgs = chatThread(npcEmail);
-  return msgs.length ? msgs.map(c => `<div class="bubble ${c.from === 'user' ? 'me' : 'npc'}"><div>${esc(c.text)}</div><small>${esc(fmt(c.ts))}</small></div>`).join('') : `<div class="empty">Start the conversation — e.g. “What is your lead time for 500 units?”</div>`;
+  return msgs.length ? msgs.map(c => `<div class="bubble ${c.from === 'user' ? 'me' : 'npc'}"><div>${esc(c.text)}</div><small>${esc(chatTime(c.ts))}</small></div>`).join('') : `<div class="empty">Start the conversation — e.g. “What is your lead time for 500 units?”</div>`;
 }
 
 /* Email */
@@ -5310,7 +5469,7 @@ function showApp() { showScreen('app'); document.title = VIEW === 'mobile' ? 'Wo
 hooks.status = t => { const el = $('syncState'); if (el) el.textContent = t; };
 hooks.changed = () => {
   render(false);
-  if (ui.chatWith && $('chatLog')) { $('chatLog').innerHTML = renderChatLog(ui.chatWith); $('chatLog').scrollTop = $('chatLog').scrollHeight; }
+  if (ui.chatWith && $('chatLog') && !ui.chatBusy) { $('chatLog').innerHTML = renderChatLog(ui.chatWith); $('chatLog').scrollTop = $('chatLog').scrollHeight; }
 };
 hooks.signedOut = () => { Overlay.close(); closeDialog(); ui.apps = null; $('loginPw').value = ''; if (location.hash !== '#login') location.hash = 'login'; showLogin(); };
 
@@ -5459,7 +5618,21 @@ const FORMS = {
     if (ui.tab !== 'mail') navigate('mail'); else render(false);
     alertBox(`Email sent.\nRule-based score: ${result.score}/100 · ${result.grade}`);
   },
-  'chat-send': async form => { const t = form.text.value; form.text.value = ''; await sendChat(form.dataset.npc, t); },
+  'chat-send': async form => {
+    const input = form.text, t = input.value.trim(); if (!t) return;
+    input.value = ''; input.focus();
+    const npc = form.dataset.npc, log = $('chatLog'), t0 = Date.now();
+    // 내 메시지는 바로 보여 주고, 상대 답장은 "입력 중…" 표시 후 도착
+    if (log) { log.querySelector('.empty')?.remove(); log.insertAdjacentHTML('beforeend', `<div class="bubble me" data-pending><div>${esc(t)}</div><small>${esc(chatTime(t0))}</small></div><div class="bubble npc typing" id="chatTyping" aria-label="typing"><i></i><i></i><i></i></div>`); log.scrollTop = log.scrollHeight; }
+    ui.chatBusy = true;
+    try { await sendChat(npc, t, { quiet: true }); }
+    catch (e) { ui.chatBusy = false; $('chatTyping')?.remove(); const p = log?.querySelector('[data-pending] small'); if (p) p.textContent = 'Not sent — try again'; input.value = t; throw e; }
+    const wait = Math.max(0, 400 + Math.min(700, t.length * 8) - (Date.now() - t0));   // 짧게: 최대 약 1초
+    if (wait) await new Promise(r => setTimeout(r, wait));
+    ui.chatBusy = false;
+    if (ui.chatWith && $('chatLog') && !ui.chatBusy) { $('chatLog').innerHTML = renderChatLog(ui.chatWith); $('chatLog').scrollTop = $('chatLog').scrollHeight; }
+    hooks.changed();
+  },
   'item-save': async (form, submitter) => { const f = formData(form); await saveItem(f, submitter?.value === 'submit', form.dataset.id || null); Overlay.close(); },
   'item-act': async (form, submitter) => { await transitionItem(form.dataset.id, submitter?.value, form.note.value); Overlay.close(); },
   'deliv-save': async (form, submitter) => {
