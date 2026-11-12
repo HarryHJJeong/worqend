@@ -187,6 +187,20 @@ table.mini td{font-size:12px;padding:6px}
 .msg-pick{padding:14px;overflow:auto;flex:1}
 .msg-checks{display:flex;flex-direction:column;gap:6px;max-height:340px;overflow:auto}
 .msg-check{display:flex;gap:10px;align-items:center;padding:8px;border:1px solid #e5ebe6;border-radius:10px;cursor:pointer}.msg-check span:last-child{display:flex;flex-direction:column}
+/* voice negotiation */
+.voice-grid{align-items:start}
+.voice-top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
+.vclock{font-size:34px;font-weight:800;line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums;color:#293e36}.vclock.low{color:#b4442f}
+.vstate{display:inline-block;margin-top:4px;font-size:13px;font-weight:700;color:#5d6762}
+.vstate.live::before,.vstate.muted::before,.vstate.connecting::before{content:'';display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:7px;vertical-align:1px;background:#7cb342;animation:wqPulse 1.2s infinite}
+.vstate.muted::before{background:#c98a2b;animation:none}.vstate.connecting::before{background:#9aa29e}
+@keyframes wqPulse{50%{opacity:.35}}
+.vlog{margin-top:14px;border:1px solid #e5ebe6;border-radius:12px;background:#fafbf9;padding:12px;height:340px;overflow:auto;display:flex;flex-direction:column;gap:10px}
+.vlog.static{height:auto;max-height:420px}
+.vl{display:flex;flex-direction:column;gap:2px;font-size:14px;line-height:1.45}.vl b{font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:#7b847f}
+.vl.ai b{color:#4b6b5e}.vl.user{align-items:flex-end;text-align:right}.vl.partial span{opacity:.6}
+.tips{margin:10px 0 6px;padding-left:18px;font-size:13.5px;color:#4b5550}.tips li{margin:3px 0}
+.btn[disabled]{opacity:.45;pointer-events:none}
 .chat-form{display:flex;gap:8px}.chat-form input{flex:1;border:1px solid #dbe3dd;border-radius:10px;padding:10px}
 /* dropzone */
 .dropzone{display:flex;flex-direction:column;align-items:center;gap:6px;border:2px dashed #b9cdb7;border-radius:16px;padding:34px;background:#f7faf4;cursor:pointer;text-align:center}.dropzone:hover{background:#f0f6ea}.dz-icon{font-size:28px;color:var(--green)}
@@ -463,6 +477,21 @@ table.mini{min-width:0}table.mini td{font-size:12px;padding:6px 4px}.matrix td,.
 .msg-checks{display:flex;flex-direction:column;gap:6px;max-height:340px;overflow:auto}
 .msg-check{display:flex;gap:10px;align-items:center;padding:8px;border:1px solid #e5ebe6;border-radius:10px;cursor:pointer}.msg-check span:last-child{display:flex;flex-direction:column}
 .msg-menu{position:relative}.msg-menu summary{list-style:none;cursor:pointer}.msg-menu summary::-webkit-details-marker{display:none}.msg-menu-pop{position:absolute;right:0;top:calc(100% + 6px);background:#fff;border:1px solid #e5ebe6;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.12);padding:8px;display:flex;flex-direction:column;gap:6px;z-index:20;min-width:160px}.msg-menu-pop .btn{width:100%;justify-content:center}
+/* voice negotiation */
+.voice-grid.m{display:flex;flex-direction:column-reverse}
+.voice-grid{align-items:start}
+.voice-top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
+.vclock{font-size:34px;font-weight:800;line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums;color:#293e36}.vclock.low{color:#b4442f}
+.vstate{display:inline-block;margin-top:4px;font-size:13px;font-weight:700;color:#5d6762}
+.vstate.live::before,.vstate.muted::before,.vstate.connecting::before{content:'';display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:7px;vertical-align:1px;background:#7cb342;animation:wqPulse 1.2s infinite}
+.vstate.muted::before{background:#c98a2b;animation:none}.vstate.connecting::before{background:#9aa29e}
+@keyframes wqPulse{50%{opacity:.35}}
+.vlog{margin-top:14px;border:1px solid #e5ebe6;border-radius:12px;background:#fafbf9;padding:12px;height:340px;overflow:auto;display:flex;flex-direction:column;gap:10px}
+.vlog.static{height:auto;max-height:420px}
+.vl{display:flex;flex-direction:column;gap:2px;font-size:14px;line-height:1.45}.vl b{font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:#7b847f}
+.vl.ai b{color:#4b6b5e}.vl.user{align-items:flex-end;text-align:right}.vl.partial span{opacity:.6}
+.tips{margin:10px 0 6px;padding-left:18px;font-size:13.5px;color:#4b5550}.tips li{margin:3px 0}
+.btn[disabled]{opacity:.45;pointer-events:none}
 .chat-form{display:flex;gap:8px}.chat-form input{flex:1;border:1px solid #dbe3dd;border-radius:12px;padding:12px;font-size:16px}
 .dropzone{display:flex;flex-direction:column;align-items:center;gap:6px;border:2px dashed #b9cdb7;border-radius:18px;padding:26px;background:#f7faf4;text-align:center}.dz-icon{font-size:26px;color:var(--green)}
 .me-card{display:flex;gap:12px;align-items:center}.select-inline{margin-top:8px;padding:8px 10px;font-size:14px}
@@ -4494,6 +4523,197 @@ function landingData(st) {
   };
 }
 
+/* ═════════ AI Voice Negotiation (1:1, OpenAI Realtime over WebRTC) ═════════
+ * The browser never holds an OpenAI key. /api/realtime-session (Vercel) checks the participant on the
+ * WORQEND server and returns only the WebRTC answer. Tool calls from the model are judged by server rules.
+ */
+const VOICE_API = (CONFIG.VOICE_API || '').replace(/\/$/, '');
+const Voice = {
+  st: 'idle', err: '', info: null, infoErr: '', loading: false, result: null,
+  pc: null, dc: null, stream: null, audio: null, sessionId: '', token: '', endsAt: 0, maxSeconds: 600,
+  timer: null, muted: false, transcript: [], aiPartial: '', usage: null, tools: new Set(), warned: false, closing: false, speaking: '',
+  scenarioId: 'brooks-renewal'
+};
+const voiceLive = () => Voice.st === 'connecting' || Voice.st === 'live';
+async function voiceLoadStatus(force) {
+  if (Store.mode !== 'remote') { Voice.infoErr = 'Voice negotiation needs the WORQEND server (it does not work in local test mode).'; return; }
+  if (Voice.loading || (Voice.info && !force)) return;
+  Voice.loading = true;
+  try { Voice.info = await Store.call({ action: 'voice.status', loginId: me.loginId, password: me.password }); Voice.infoErr = ''; }
+  catch (e) { Voice.infoErr = e.message; }
+  finally { Voice.loading = false; if (ui.tab === 'voice' && !voiceLive()) render(false); }
+}
+async function voiceApi(path, payload, { beacon } = {}) {
+  const url = `${VOICE_API}/api/${path}`, bodyStr = JSON.stringify(payload);
+  if (beacon && navigator.sendBeacon) { navigator.sendBeacon(url, new Blob([bodyStr], { type: 'application/json' })); return null; }
+  let r;
+  try { r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: bodyStr, keepalive: path === 'negotiation-end' }); }
+  catch (_) { throw Error('Network error — check your connection and try again.'); }
+  let j = null; try { j = await r.json(); } catch (_) {}
+  if (!r.ok || !j || !j.ok) { const e = Error((j && j.error) || `Server error (${r.status}).`); e.code = j && j.code; throw e; }
+  return j;
+}
+function voiceSend(ev) { try { if (Voice.dc && Voice.dc.readyState === 'open') Voice.dc.send(JSON.stringify(ev)); } catch (_) {} }
+function voiceAddUsage(u) {
+  if (!u) return; const x = Voice.usage = Voice.usage || { inAudio: 0, inAudioCached: 0, inText: 0, inTextCached: 0, outAudio: 0, outText: 0, responses: 0 };
+  const it = u.input_token_details || {}, cd = it.cached_tokens_details || {}, ot = u.output_token_details || {};
+  x.inAudio += it.audio_tokens || 0; x.inText += it.text_tokens || 0; x.inAudioCached += cd.audio_tokens || 0; x.inTextCached += cd.text_tokens || 0;
+  x.outAudio += ot.audio_tokens || 0; x.outText += ot.text_tokens || 0; x.responses++;
+}
+function voiceLog(who, text) { text = String(text || '').trim(); if (!text) return; Voice.transcript.push({ who, text, t: Date.now() }); voicePaintLog(); }
+async function voiceTool(item) {
+  if (!item || item.type !== 'function_call' || Voice.tools.has(item.call_id)) return;
+  Voice.tools.add(item.call_id);
+  let args = {}; try { args = JSON.parse(item.arguments || '{}'); } catch (_) {}
+  let output;
+  try { output = (await voiceApi('negotiation-tool', { sessionId: Voice.sessionId, token: Voice.token, name: item.name, args })).output; }
+  catch (e) { output = { error: 'unavailable', say: 'Say you need to check with your team and continue the conversation without committing to anything.' }; }
+  if (item.name === 'close_negotiation' && output && output.accepted) { Voice.closing = true; voicePaintStatus(); }
+  voiceSend({ type: 'conversation.item.create', item: { type: 'function_call_output', call_id: item.call_id, output: JSON.stringify(output) } });
+  voiceSend({ type: 'response.create' });
+}
+function voiceOnEvent(raw) {
+  let e; try { e = JSON.parse(raw.data); } catch (_) { return; }
+  switch (e.type) {
+    case 'conversation.item.input_audio_transcription.completed': voiceLog('user', e.transcript); break;
+    case 'input_audio_buffer.speech_started': Voice.speaking = 'you'; voicePaintStatus(); break;
+    case 'input_audio_buffer.speech_stopped': Voice.speaking = ''; voicePaintStatus(); break;
+    case 'response.output_audio_transcript.delta': case 'response.audio_transcript.delta': Voice.aiPartial += e.delta || ''; Voice.speaking = 'ai'; voicePaintLog(); break;
+    case 'response.output_audio_transcript.done': case 'response.audio_transcript.done': Voice.aiPartial = ''; Voice.speaking = ''; voiceLog('ai', e.transcript); voicePaintStatus(); break;
+    case 'response.done': voiceAddUsage(e.response && e.response.usage); ((e.response && e.response.output) || []).forEach(it => { if (it.type === 'function_call' && it.status === 'completed') voiceTool(it); }); break;
+    case 'error': console.warn('Realtime error', e.error); break;
+  }
+}
+function voiceCleanup() {
+  clearInterval(Voice.timer); Voice.timer = null;
+  try { Voice.dc && Voice.dc.close(); } catch (_) {}
+  try { Voice.pc && Voice.pc.close(); } catch (_) {}
+  try { Voice.stream && Voice.stream.getTracks().forEach(t => t.stop()); } catch (_) {}
+  if (Voice.audio) { try { Voice.audio.srcObject = null; Voice.audio.remove(); } catch (_) {} }
+  Voice.pc = Voice.dc = Voice.stream = Voice.audio = null; Voice.speaking = '';
+  window.removeEventListener('pagehide', voiceOnPageHide);
+}
+function voiceOnPageHide() { if (Voice.st === 'live' && Voice.sessionId) voiceApi('negotiation-end', { sessionId: Voice.sessionId, token: Voice.token, reason: 'unload', transcript: Voice.transcript, usage: Voice.usage }, { beacon: true }); }
+async function voiceStart() {
+  if (voiceLive() || Voice.st === 'ending') return;
+  const i = Voice.info; if (!i || !i.enabled || !i.allowed || !i.budgetOk || i.busy) return;
+  if (!window.RTCPeerConnection || !navigator.mediaDevices?.getUserMedia) { Voice.err = 'This browser does not support voice calls. Please use the latest Chrome, Safari or Edge.'; return render(false); }
+  Object.assign(Voice, { st: 'connecting', err: '', result: null, transcript: [], aiPartial: '', usage: null, tools: new Set(), warned: false, closing: false, muted: false, sessionId: '', token: '' });
+  render(false);
+  // audio element is created inside the click so mobile browsers allow playback
+  const audio = Voice.audio = document.createElement('audio'); audio.autoplay = true; audio.setAttribute('playsinline', ''); audio.style.display = 'none'; document.body.appendChild(audio); audio.play().catch(() => {});
+  try { Voice.stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } }); }
+  catch (e) { voiceCleanup(); Voice.st = 'idle'; Voice.err = e && e.name === 'NotAllowedError' ? 'Microphone access was blocked. Allow the microphone for this site in your browser settings, then try again.' : e && e.name === 'NotFoundError' ? 'No microphone was found on this device.' : 'Could not start the microphone.'; return render(false); }
+  try {
+    const pc = Voice.pc = new RTCPeerConnection();
+    pc.ontrack = ev => { if (Voice.audio) { Voice.audio.srcObject = ev.streams[0]; Voice.audio.play().catch(() => {}); } };
+    Voice.stream.getTracks().forEach(t => pc.addTrack(t, Voice.stream));
+    const dc = Voice.dc = pc.createDataChannel('oai-events');
+    dc.addEventListener('message', voiceOnEvent);
+    dc.addEventListener('open', () => voiceSend({ type: 'response.create' }));   // Daniel opens the call
+    let dropTimer = null;
+    pc.addEventListener('connectionstatechange', () => {
+      const s = pc.connectionState;
+      if (s === 'failed') voiceEnd('network');
+      else if (s === 'disconnected') { clearTimeout(dropTimer); dropTimer = setTimeout(() => { if (Voice.pc === pc && pc.connectionState !== 'connected') voiceEnd('network'); }, 6000); }
+    });
+    const offer = await pc.createOffer(); await pc.setLocalDescription(offer);
+    const j = await voiceApi('realtime-session', { loginId: me.loginId, password: me.password, projectId: currentProjectId(), scenarioId: Voice.scenarioId, sdp: offer.sdp });
+    if (Voice.st !== 'connecting') return;   // cancelled meanwhile
+    Object.assign(Voice, { sessionId: j.sessionId, token: j.token, maxSeconds: j.maxSeconds || 600 });
+    Voice.endsAt = Date.now() + Voice.maxSeconds * 1000;   // local clock (avoids clock skew); the server enforces its own limit
+    await pc.setRemoteDescription({ type: 'answer', sdp: j.sdp });
+    Voice.st = 'live';
+    window.addEventListener('pagehide', voiceOnPageHide);
+    Voice.timer = setInterval(voiceTick, 250);
+    render(false);
+  } catch (e) {
+    const sid = Voice.sessionId, tok = Voice.token;
+    voiceCleanup(); Voice.st = 'idle'; Voice.err = e.message || 'Could not connect.';
+    if (sid) voiceApi('negotiation-end', { sessionId: sid, token: tok, reason: 'error', transcript: [], usage: null }).catch(() => {});
+    if (e.code === 'BUDGET' || e.code === 'NOT_ALLOWED' || e.code === 'BUSY') voiceLoadStatus(true);
+    render(false);
+  }
+}
+function voiceTick() {
+  const left = Math.max(0, Math.round((Voice.endsAt - Date.now()) / 1000));
+  if (left <= 60 && !Voice.warned) { Voice.warned = true; voiceSend({ type: 'conversation.item.create', item: { type: 'message', role: 'system', content: [{ type: 'input_text', text: 'Time check: about one minute left in this call. Start wrapping up politely now.' }] } }); }
+  const el = $('voiceClock'); if (el) { el.textContent = `${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`; el.classList.toggle('low', left <= 60); }
+  if (left <= 0) voiceEnd('time_up');
+}
+async function voiceEnd(reason = 'user') {
+  if (!voiceLive()) return;
+  const wasLive = Voice.st === 'live', sid = Voice.sessionId, tok = Voice.token;
+  if (Voice.aiPartial) voiceLog('ai', Voice.aiPartial + ' …');
+  Voice.aiPartial = ''; Voice.st = 'ending'; voiceCleanup(); render(false);
+  if (!sid) { Voice.st = 'idle'; return render(false); }
+  try { const r = await voiceApi('negotiation-end', { sessionId: sid, token: tok, reason, transcript: Voice.transcript, usage: Voice.usage }); Voice.result = { ...r, reason }; }
+  catch (e) { Voice.result = { reason, error: e.message }; }
+  Voice.st = 'ended'; Voice.info = null; voiceLoadStatus(true);
+  if (!wasLive && !Voice.transcript.length) Voice.st = 'idle';
+  render(false);
+}
+function voiceMute() { Voice.muted = !Voice.muted; Voice.stream?.getAudioTracks().forEach(t => (t.enabled = !Voice.muted)); voicePaintStatus(); const b = $('voiceMuteBtn'); if (b) b.textContent = Voice.muted ? '🎙 Unmute' : '🔇 Mute'; }
+function voiceLogHtml() {
+  const lines = Voice.transcript.map(x => `<div class="vl ${x.who}"><b>${x.who === 'ai' ? 'Daniel' : 'You'}</b><span>${esc(x.text)}</span></div>`).join('');
+  return lines + (Voice.aiPartial ? `<div class="vl ai partial"><b>Daniel</b><span>${esc(Voice.aiPartial)}</span></div>` : '') || `<div class="empty">${voiceLive() ? 'Listening… the transcript appears here.' : 'The transcript will appear here during the call.'}</div>`;
+}
+function voicePaintLog() { const el = $('voiceLog'); if (!el) return; const end = el.scrollHeight - el.scrollTop - el.clientHeight < 80; el.innerHTML = voiceLogHtml(); if (end) el.scrollTop = el.scrollHeight; }
+function voiceStatusText() { return Voice.st === 'connecting' ? 'Connecting…' : Voice.st === 'ending' ? 'Ending…' : Voice.st !== 'live' ? 'Ready' : Voice.muted ? 'You are muted' : Voice.closing ? 'Daniel is wrapping up — you can end the call' : Voice.speaking === 'ai' ? 'Daniel is speaking — you can interrupt' : Voice.speaking === 'you' ? 'Listening to you…' : 'Live'; }
+function voicePaintStatus() { const el = $('voiceState'); if (el) { el.textContent = voiceStatusText(); el.className = 'vstate ' + (Voice.st === 'live' ? (Voice.muted ? 'muted' : 'live') : Voice.st); } }
+const VOICE_OUTCOME = { tentative_agreement: ['Tentative agreement', 'Daniel agreed in principle, subject to his internal approval.'], acceptable_offer_not_closed: ['Good offer, not closed', 'Your offer met his limits, but the call ended before you closed the deal.'], no_deal: ['No deal', 'The call ended without an agreement.'], incomplete: ['Too short', 'The call ended before the negotiation really started.'] };
+function pageVoice() {
+  const p = project(); if (!p && !isDirector()) return noProject();
+  if (!Voice.info && !Voice.infoErr && !Voice.loading) voiceLoadStatus();
+  const sc = (Voice.info?.scenarios || [])[0], br = sc?.brief;
+  const blocked = !Voice.info ? '' : !Voice.info.enabled ? 'Voice negotiation is turned off right now.' : !Voice.info.allowed ? 'Your account is not enabled for the voice test yet. Ask the Director.' : !Voice.info.budgetOk ? 'This month’s voice test budget has been used up.' : Voice.info.busy ? 'Another participant is in a voice session. Only one session runs at a time during the test — try again in a few minutes.' : '';
+  const live = voiceLive(), left = Voice.st === 'live' ? Math.max(0, Math.round((Voice.endsAt - Date.now()) / 1000)) : (Voice.info?.maxSeconds || 600);
+  const controls = live || Voice.st === 'ending'
+    ? `<div class="btn-row">${btn(Voice.muted ? '🎙 Unmute' : '🔇 Mute', 'voice-mute', {}).replace('<button', '<button id="voiceMuteBtn"')}${btn('■ End call', 'voice-end', {}, 'danger')}</div>`
+    : `<div class="btn-row">${btn('🎙 Start negotiation', 'voice-start', {}, 'primary').replace('<button', blocked || !Voice.info ? '<button disabled' : '<button')}${Voice.info ? '' : '<span class="muted tiny">Checking access…</span>'}</div>`;
+  const res = Voice.result && !live ? (() => { const o = VOICE_OUTCOME[Voice.result.outcome] || ['Call ended', '']; return card(`<div class="eyebrow">RESULT</div><h3>${esc(o[0])}</h3><p class="muted">${esc(o[1])}${Voice.result.summary ? ' — ' + esc(Voice.result.summary) : ''}</p><p class="tiny muted">${Voice.result.durationSec != null ? `Duration ${Math.floor(Voice.result.durationSec / 60)}:${String(Voice.result.durationSec % 60).padStart(2, '0')} · ` : ''}${Voice.result.reason === 'time_up' ? 'Ended at the 10-minute limit · ' : ''}${Voice.result.error ? 'Could not save the result: ' + esc(Voice.result.error) : 'Saved.'} Only the AI decides “agreement” inside this simulation — it is not a real contract.</p>`); })() : '';
+  const hist = (Voice.info?.history || []).filter(h => h.durationSec > 0);
+  return `${Voice.infoErr ? notice(esc(Voice.infoErr), 'warn') : ''}${Voice.err ? notice(esc(Voice.err), 'warn') : ''}${blocked && !live ? notice(esc(blocked), 'warn') : ''}
+  <div class="grid g2 voice-grid${VIEW === 'mobile' ? ' m' : ''}">
+    ${card(`<div class="eyebrow">AI VOICE NEGOTIATION · 1:1 · 10 MIN</div><h3>${esc(sc?.title || 'Supply contract renewal')}</h3>${br ? `${kv([['Customer', br.customer], ['Situation', br.situation], ['Your role', br.yourRole]])}<ul class="tips">${(br.tips || []).map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : '<p class="muted">Loading the brief…</p>'}<p class="tiny muted">Simulated customer — replies come from an AI voice model. Speak English. Audio is not recorded; a text transcript (which may contain recognition errors) is saved for your feedback and kept until the end of the season.</p>`)}
+    ${card(`<div class="voice-top"><div><div class="eyebrow">CALL</div><div id="voiceState" class="vstate ${Voice.st === 'live' ? 'live' : Voice.st}">${esc(voiceStatusText())}</div></div><div id="voiceClock" class="vclock ${left <= 60 && Voice.st === 'live' ? 'low' : ''}">${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}</div></div>${controls}<div class="vlog" id="voiceLog">${voiceLogHtml()}</div>`)}
+  </div>${res}
+  ${hist.length ? `${sectionTitle('Your past sessions')}${list(hist.map(h => listRow({ title: (VOICE_OUTCOME[h.outcome] || [h.status])[0], sub: `${fmt(h.createdAt)} · ${Math.floor(h.durationSec / 60)}:${String(h.durationSec % 60).padStart(2, '0')}${h.summary ? ' · ' + h.summary : ''}` })))}` : ''}`;
+}
+
+/* ── Director: Voice Lab ── */
+// ui.voiceAdmin, ui.voiceAdminErr, ui.voiceOpen live on the shared ui object (ui.js)
+async function voiceAdminLoad() {
+  if (Store.mode !== 'remote') { ui.voiceAdminErr = 'Voice Lab needs the WORQEND server (not available in local test mode).'; return render(false); }
+  try { ui.voiceAdmin = await Store.call({ action: 'voice.admin.get', key: DIRECTOR.password }); ui.voiceAdminErr = ''; }
+  catch (e) { ui.voiceAdminErr = e.message; }
+  if (ui.tab === 'voicelab') render(false);
+}
+const vstat = (label, value, sub) => card(`<div class="stat-label">${esc(String(label).toUpperCase())}</div><div class="number" style="font-size:30px">${esc(String(value))}</div><div class="muted tiny">${esc(sub)}</div>`);
+function pageVoiceLab() {
+  if (!ui.voiceAdmin && !ui.voiceAdminErr) { voiceAdminLoad(); return notice('Loading Voice Lab…'); }
+  if (!ui.voiceAdmin) return notice(esc(ui.voiceAdminErr), 'warn');
+  const a = ui.voiceAdmin, c = a.config, m = a.month, accs = db.accounts.filter(x => x.active !== false && x.id !== DIRECTOR.id);
+  const won = n => 'KRW ' + Number(n || 0).toLocaleString('en-US');
+  const sess = a.sessions || [];
+  const open = sess.find(s => s.id === ui.voiceOpen);
+  return `${a.configured ? '' : notice('The server secret is not set yet. In Apps Script → Project settings → Script properties, add <b>WORQEND_SERVER_SECRET</b> (same value as in Vercel). Then run <b>setupVoiceTrigger</b> once.', 'warn')}
+  ${notice('1:1 AI voice negotiation test. Only the accounts you allow can start a session; one session runs at a time, each up to 10 minutes. Spending is estimated conservatively from call time and recorded token usage — OpenAI budgets are not a hard cap, so also check your OpenAI usage page.')}
+  <div class="grid g3 voice-stats">${vstat('Est. spend · ' + m.month, won(m.spentKrw), `block at ${won(c.blockKrw)} · budget ${won(c.budgetKrw)}`)}${vstat('Sessions this month', m.sessions, `${Math.round(m.seconds / 60)} min total`)}${vstat('Status', c.enabled ? 'On' : 'Off', c.enabled ? 'New sessions allowed' : 'New sessions blocked')}</div>
+  ${card(`<form data-form="voice-cfg"><div class="grid g2"><label class="check"><input type="checkbox" name="enabled" ${c.enabled ? 'checked' : ''}> Voice negotiation enabled</label><div></div>
+    <div class="field"><label>Monthly budget (KRW)</label><input name="budgetKrw" type="number" min="0" step="100" value="${c.budgetKrw}"></div>
+    <div class="field"><label>Block new sessions at (KRW)</label><input name="blockKrw" type="number" min="0" step="100" value="${c.blockKrw}"></div>
+    <div class="field"><label>Exchange rate (KRW per USD)</label><input name="usdKrw" type="number" min="500" step="1" value="${c.usdKrw}"></div>
+    <div class="field"><label>Max minutes per session</label><input name="maxMin" type="number" min="1" max="10" value="${Math.round(c.maxSeconds / 60)}"></div></div>
+    <div class="field"><label>Allowed accounts</label><div class="msg-checks">${accs.map(x => `<label class="msg-check"><input type="checkbox" name="allow" value="${esc(x.id)}" ${(c.allowed || []).includes(x.id) ? 'checked' : ''}><span class="avatar">${esc(initials(x.name))}</span><span><b>${esc(x.name)}</b><small class="muted">${esc(x.loginId)} · ${esc(projectById(x.projectId)?.name || 'No project')}</small></span></label>`).join('') || '<p class="muted tiny">No participant accounts yet.</p>'}</div><small class="tiny muted">The Director account can always test.</small></div>
+    <div class="error" data-error></div><div class="btn-row end"><span class="tiny muted" data-saved></span><button class="btn primary">Save settings</button></div></form>`)}
+  ${sectionTitle('Sessions', btn('↻ Refresh', 'voice-admin-refresh', {}, 'small'))}
+  ${list(sess.map(s => listRow({ title: `${s.participantName || s.participantId} · ${(VOICE_OUTCOME[s.outcome] || [s.outcome || s.status])[0]}`, sub: `${fmt(s.createdAt)} · ${s.status}${s.durationSec ? ` · ${Math.floor(s.durationSec / 60)}:${String(s.durationSec % 60).padStart(2, '0')}` : ''} · est. ${won(s.estCostKrw)}${s.tokenCostUsd != null ? ` (tokens $${s.tokenCostUsd})` : ''}${s.error ? ' · ' + s.error : ''}`, act: 'voice-admin-open', data: { id: s.id } })), 'No sessions yet.')}
+  ${open ? card(`<div class="eyebrow">SESSION DETAIL</div><h3>${esc(open.participantName || '')} · ${esc(fmt(open.createdAt))}</h3><p class="tiny muted">Model ${esc(open.model)} · end reason ${esc(open.endReason || '—')} · ${open.summary ? esc(open.summary) : ''}</p>
+    <h4>Transcript <span class="tiny muted">(speech recognition — may contain errors)</span></h4><div class="vlog static">${(open.transcript || []).map(x => `<div class="vl ${x.who}"><b>${x.who === 'ai' ? 'Daniel' : 'User'}</b><span>${esc(x.text)}</span></div>`).join('') || '<p class="muted tiny">No transcript.</p>'}</div>
+    <h4>Server decisions</h4>${(open.toolLog || []).map(t => `<div class="tiny"><code>${esc(t.name)}</code> ${esc(JSON.stringify(t.args))} → <b>${esc(t.out?.verdict || (t.out?.accepted != null ? (t.out.accepted ? 'accepted' : 'refused') : 'guidance'))}</b></div>`).join('') || '<p class="muted tiny">None.</p>'}`) : ''}`;
+}
+
 /* ═════════════════════════════════════════════════════════════
    WORQEND · UI (PC와 모바일이 같은 화면 로직을 쓰고, 껍데기·스타일만 다릅니다)
    ═════════════════════════════════════════════════════════════ */
@@ -5638,6 +5858,7 @@ const PAGES = {
   mail: { title: 'worqend Email', label: 'Email', ico: '✉', group: 'Workspace', render: pageMail, action: () => project() && { label: '✎ Compose', act: 'compose' } },
   meetings: { title: 'Meetings & Minutes', label: 'Meetings', ico: '☷', group: 'Workspace', render: pageMeetings, action: () => project() && canEditMeeting() && { label: '+ New meeting', act: 'meeting-new' } },
   deliverables: { title: 'Deliverables', label: 'Deliverables', ico: '▧', group: 'Workspace', render: pageDeliverables },
+  voice: { title: 'AI Voice Negotiation', label: 'Voice Negotiation', ico: '🎙', group: 'Workspace', when: () => !!project(), render: pageVoice },
   messenger: { title: 'Messenger', label: 'Messenger', ico: '💬', group: 'Workspace', render: pageMessenger, badge: () => totalUnread() },
   directory: { title: 'Directory & Contacts', label: 'Directory', ico: '▦', group: 'Workspace', render: pageDirectory },
   wallet: { title: 'Wallet', label: 'Wallet', ico: '₩', group: 'Workspace', when: () => !!project() && (isDirector() || isPM() || !!myWalletKey()), render: pageWallet, action: () => myWalletKey() && { label: '+ Purchase / Spend', act: 'po-new' } },
@@ -5650,6 +5871,7 @@ const PAGES = {
   builder: { title: 'Project Builder', label: 'Builder', ico: '✎', when: isDirector, render: pageBuilder },
   scenario: { title: 'Scenario Console', label: 'Scenario', ico: '✧', group: 'Program', when: isDirector, render: pageScenario },
   lpsettings: { title: 'Landing Page Settings', label: 'Landing Settings', ico: '▤', group: 'Recruiting', when: isDirector, render: pageLpSettings },
+  voicelab: { title: 'Voice Lab', label: 'Voice Lab', ico: '🎙', group: 'Program', when: isDirector, render: pageVoiceLab },
   crm: { title: 'CRM · Contacts', label: 'CRM', ico: '◎', group: 'Recruiting', when: isDirector, render: pageCrm, badge: () => (ui.apps || []).filter(a => a.followUp && a.followUp <= todayStr()).length },
   applicants: { title: 'Applicants', label: 'Applicants', ico: '✚', group: 'Recruiting', when: isDirector, render: pageApplicants, badge: () => (ui.apps || []).filter(a => a.status === 'New').length },
   accounts: { title: 'Accounts', label: 'Accounts', ico: '⚙', group: 'Program', when: isDirector, render: pageAccounts, action: () => ({ label: '+ Account', act: 'account-new' }) },
@@ -5666,14 +5888,14 @@ const MOBILE_TABS = () => [
 /* ── Navigation: groups · search · collapse ────────────── */
 const NAV_GROUPS = [['Workspace', 'Workspace'], ['Leadership', 'Leadership'], ['Program', 'Program Admin'], ['Recruiting', 'Recruiting & CRM']];
 const NAV_KW = {
-  messenger: 'chat message dm group team talk', overview: 'home project dashboard', mywork: 'my role mission tasks', timeline: 'week schedule', mail: 'inbox email', meetings: 'minutes agenda',
+  messenger: 'chat message dm group team talk', voice: 'voice call speak negotiation ai customer', voicelab: 'voice budget ai negotiation allow', overview: 'home project dashboard', mywork: 'my role mission tasks', timeline: 'week schedule', mail: 'inbox email', meetings: 'minutes agenda',
   deliverables: 'files submit', finalreports: 'final report publish pdf',  directory: 'contacts team org chart', wallet: 'budget money', report: 'pdf final',
   inbox: 'coordinator approval report', pm: 'approve decide dashboard', director: 'review evaluate', projects: 'import excel builder', scenario: 'events contacts',
   accounts: 'users password', applicants: 'applications', crm: 'leads contacts', lpsettings: 'landing homepage fee faq'
 };
 const NAV_COLLAPSE_KEY = 'worqend_nav_collapsed_v1';
 function navCollapsed() { try { const v = JSON.parse(localStorage.getItem(NAV_COLLAPSE_KEY) || 'null'); return new Set(v || ['Leadership', 'Program', 'Recruiting']); } catch (_) { return new Set(); } }
-const NAV_ORDER = ['overview', 'mywork', 'mail', 'messenger', 'meetings', 'timeline', 'deliverables', 'directory', 'wallet', 'report', 'inbox', 'pm', 'director', 'finalreports', 'projects', 'scenario', 'accounts', 'applicants', 'crm', 'lpsettings'];
+const NAV_ORDER = ['overview', 'mywork', 'mail', 'messenger', 'voice', 'meetings', 'timeline', 'deliverables', 'directory', 'wallet', 'report', 'inbox', 'pm', 'director', 'finalreports', 'projects', 'scenario', 'accounts', 'voicelab', 'applicants', 'crm', 'lpsettings'];
 const navRank = k => { const i = NAV_ORDER.indexOf(k); return i < 0 ? 99 : i; };
 function navItems() { return Object.entries(PAGES).filter(([, p]) => p.group && !p.mobileOnly && (!p.when || p.when())).sort((a, b) => navRank(a[0]) - navRank(b[0])); }
 function navMatch(k, p, q) { if (!q) return true; q = q.toLowerCase().replace(/\s+/g, ''); return [p.label, p.title, NAV_KW[k] || '', k].join(' ').toLowerCase().replace(/\s+/g, '').includes(q); }
@@ -5766,7 +5988,7 @@ const ACTIONS = {
   'nav': d => { Overlay.close(); if ($('navSearch')?.value) { $('navSearch').value = ''; } navigate(d.tab); },
   'nav-toggle': d => { const c = navCollapsed(); c.has(d.g) ? c.delete(d.g) : c.add(d.g); try { localStorage.setItem(NAV_COLLAPSE_KEY, JSON.stringify([...c])); } catch (_) {} const sec = document.querySelector(`[data-nav-group="${d.g}"]`); if (sec) { const open = !c.has(d.g); sec.classList.toggle('open', open); sec.querySelector('.nav-toggle')?.setAttribute('aria-expanded', open); } },
   'back': () => navigate('more'),
-  'logout': () => confirmBox('Sign out of Worqend?', () => signOut(), 'Sign out'),
+  'logout': () => confirmBox(voiceLive() ? 'A voice call is running. End it and sign out?' : 'Sign out of Worqend?', async () => { if (voiceLive()) await voiceEnd('user'); signOut(); }, 'Sign out'),
   'refresh': async () => { await sync(); render(false); },
   'switch-view': d => switchView(d.view),
   'close-overlay': () => Overlay.close(),
@@ -5797,6 +6019,11 @@ const ACTIONS = {
   'assess-view': d => openAssessmentRecord(d.id),
   /* chat */
   'chat-open': d => openChat(d.npc),
+  'voice-start': () => voiceStart(),
+  'voice-end': () => voiceEnd('user'),
+  'voice-mute': () => voiceMute(),
+  'voice-admin-refresh': () => { ui.voiceAdmin = null; voiceAdminLoad(); },
+  'voice-admin-open': d => { ui.voiceOpen = ui.voiceOpen === d.id ? null : d.id; render(false); },
   'msg-open': d => { ui.msgNew = null; ui.msgKey = d.key; ui.msgFiles = []; if (ui.tab !== 'messenger') return navigate('messenger'); render(false); },
   'msg-goto': d => { Overlay.close(); ui.msgNew = null; ui.msgKey = d.key; navigate('messenger'); },
   'msg-back': () => { ui.msgKey = null; ui.msgNew = null; render(false); },
@@ -5918,6 +6145,11 @@ const FORMS = {
     alertBox(`Email sent.\nRule-based score: ${result.score}/100 · ${result.grade}`);
   },
   'chat-send': async form => { await sendFromComposer(form, 'npc:' + norm(form.dataset.npc), $('chatLog')); },
+  'voice-cfg': async form => {
+    const cfg = { enabled: form.enabled.checked, budgetKrw: Number(form.budgetKrw.value), blockKrw: Number(form.blockKrw.value), usdKrw: Number(form.usdKrw.value), maxSeconds: Math.round(Number(form.maxMin.value) * 60), allowed: [...form.querySelectorAll('[name=allow]:checked')].map(x => x.value) };
+    const saved = await Store.call({ action: 'voice.admin.save', key: DIRECTOR.password, config: cfg });
+    ui.voiceAdmin.config = saved; const m = form.querySelector('[data-saved]'); if (m) m.textContent = '✓ Saved';
+  },
   'msg-send': async form => { await sendFromComposer(form, form.dataset.key, $('msgLog')); },
   'grp-create': async form => { const ids = [...form.querySelectorAll('[name=m]:checked')].map(x => x.value); const r = await createGroup(form.name.value, ids); ui.msgNew = null; ui.msgKey = 'room:' + r.id; render(false); },
   'grp-add': async form => { const ids = [...form.querySelectorAll('[name=m]:checked')].map(x => x.value); if (!ids.length) throw Error('Choose at least one person.'); await addGroupMembers(form.dataset.id, ids); ui.msgNew = null; render(false); },

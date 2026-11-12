@@ -1,0 +1,6 @@
+{
+  "name": "worqend",
+  "private": true,
+  "description": "WORQEND static site + voice negotiation API (Vercel functions)",
+  "engines": { "node": ">=20" }
+}
