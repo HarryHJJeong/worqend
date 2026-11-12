@@ -201,6 +201,7 @@ table.mini td{font-size:12px;padding:6px}
 .vl.ai b{color:#4b6b5e}.vl.user{align-items:flex-end;text-align:right}.vl.partial span{opacity:.6}
 .tips{margin:10px 0 6px;padding-left:18px;font-size:13.5px;color:#4b5550}.tips li{margin:3px 0}
 .btn[disabled]{opacity:.45;pointer-events:none}
+.msg-check input[type=checkbox]{width:18px!important;height:18px;flex:0 0 18px;margin:0;padding:0;accent-color:#293e36}.msg-check .avatar{flex:0 0 auto}.msg-check span:last-child{flex:1;min-width:0;text-align:left}.msg-check span:last-child small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .chat-form{display:flex;gap:8px}.chat-form input{flex:1;border:1px solid #dbe3dd;border-radius:10px;padding:10px}
 /* dropzone */
 .dropzone{display:flex;flex-direction:column;align-items:center;gap:6px;border:2px dashed #b9cdb7;border-radius:16px;padding:34px;background:#f7faf4;cursor:pointer;text-align:center}.dropzone:hover{background:#f0f6ea}.dz-icon{font-size:28px;color:var(--green)}
@@ -492,6 +493,7 @@ table.mini{min-width:0}table.mini td{font-size:12px;padding:6px 4px}.matrix td,.
 .vl.ai b{color:#4b6b5e}.vl.user{align-items:flex-end;text-align:right}.vl.partial span{opacity:.6}
 .tips{margin:10px 0 6px;padding-left:18px;font-size:13.5px;color:#4b5550}.tips li{margin:3px 0}
 .btn[disabled]{opacity:.45;pointer-events:none}
+.msg-check input[type=checkbox]{width:18px!important;height:18px;flex:0 0 18px;margin:0;padding:0;accent-color:#293e36}.msg-check .avatar{flex:0 0 auto}.msg-check span:last-child{flex:1;min-width:0;text-align:left}.msg-check span:last-child small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .chat-form{display:flex;gap:8px}.chat-form input{flex:1;border:1px solid #dbe3dd;border-radius:12px;padding:12px;font-size:16px}
 .dropzone{display:flex;flex-direction:column;align-items:center;gap:6px;border:2px dashed #b9cdb7;border-radius:18px;padding:26px;background:#f7faf4;text-align:center}.dz-icon{font-size:26px;color:var(--green)}
 .me-card{display:flex;gap:12px;align-items:center}.select-inline{margin-top:8px;padding:8px 10px;font-size:14px}
@@ -4539,7 +4541,7 @@ async function voiceLoadStatus(force) {
   if (Store.mode !== 'remote') { Voice.infoErr = 'Voice negotiation needs the WORQEND server (it does not work in local test mode).'; return; }
   if (Voice.loading || (Voice.info && !force)) return;
   Voice.loading = true;
-  try { Voice.info = await Store.call({ action: 'voice.status', loginId: me.loginId, password: me.password }); Voice.infoErr = ''; }
+  try { Voice.info = await Store.call({ action: 'voice.status', loginId: me.loginId, password: me.password }); Voice.infoErr = ''; Voice.infoAt = Date.now(); }
   catch (e) { Voice.infoErr = e.message; }
   finally { Voice.loading = false; if (ui.tab === 'voice' && !voiceLive()) render(false); }
 }
@@ -4665,6 +4667,8 @@ const VOICE_OUTCOME = { tentative_agreement: ['Tentative agreement', 'Daniel agr
 function pageVoice() {
   const p = project(); if (!p && !isDirector()) return noProject();
   if (!Voice.info && !Voice.infoErr && !Voice.loading) voiceLoadStatus();
+  else if (!voiceLive() && Voice.st !== 'ending' && !Voice.loading && Date.now() - (Voice.infoAt || 0) > 15000) voiceLoadStatus(true);   // 설정(시간 제한 등) 변경을 바로 반영
+  const maxMin = Math.round(((voiceLive() ? Voice.maxSeconds : Voice.info?.maxSeconds) || 600) / 60);
   const sc = (Voice.info?.scenarios || [])[0], br = sc?.brief;
   const blocked = !Voice.info ? '' : !Voice.info.enabled ? 'Voice negotiation is turned off right now.' : !Voice.info.allowed ? 'Your account is not enabled for the voice test yet. Ask the Director.' : !Voice.info.budgetOk ? 'This month’s voice test budget has been used up.' : Voice.info.busy ? 'Another participant is in a voice session. Only one session runs at a time during the test — try again in a few minutes.' : '';
   const live = voiceLive(), left = Voice.st === 'live' ? Math.max(0, Math.round((Voice.endsAt - Date.now()) / 1000)) : (Voice.info?.maxSeconds || 600);
@@ -4675,7 +4679,7 @@ function pageVoice() {
   const hist = (Voice.info?.history || []).filter(h => h.durationSec > 0);
   return `${Voice.infoErr ? notice(esc(Voice.infoErr), 'warn') : ''}${Voice.err ? notice(esc(Voice.err), 'warn') : ''}${blocked && !live ? notice(esc(blocked), 'warn') : ''}
   <div class="grid g2 voice-grid${VIEW === 'mobile' ? ' m' : ''}">
-    ${card(`<div class="eyebrow">AI VOICE NEGOTIATION · 1:1 · 10 MIN</div><h3>${esc(sc?.title || 'Supply contract renewal')}</h3>${br ? `${kv([['Customer', br.customer], ['Situation', br.situation], ['Your role', br.yourRole]])}<ul class="tips">${(br.tips || []).map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : '<p class="muted">Loading the brief…</p>'}<p class="tiny muted">Simulated customer — replies come from an AI voice model. Speak English. Audio is not recorded; a text transcript (which may contain recognition errors) is saved for your feedback and kept until the end of the season.</p>`)}
+    ${card(`<div class="eyebrow">AI VOICE NEGOTIATION · 1:1 · ${maxMin} MIN</div><h3>${esc(sc?.title || 'Supply contract renewal')}</h3>${br ? `${kv([['Customer', br.customer], ['Situation', br.situation], ['Your role', br.yourRole]])}<ul class="tips">${(br.tips || []).map(t => `<li>${esc(String(t).replace(/\b\d+ minutes?\b/, maxMin + (maxMin === 1 ? ' minute' : ' minutes')))}</li>`).join('')}</ul>` : '<p class="muted">Loading the brief…</p>'}<p class="tiny muted">Simulated customer — replies come from an AI voice model. Speak English. Audio is not recorded; a text transcript (which may contain recognition errors) is saved for your feedback and kept until the end of the season.</p>`)}
     ${card(`<div class="voice-top"><div><div class="eyebrow">CALL</div><div id="voiceState" class="vstate ${Voice.st === 'live' ? 'live' : Voice.st}">${esc(voiceStatusText())}</div></div><div id="voiceClock" class="vclock ${left <= 60 && Voice.st === 'live' ? 'low' : ''}">${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}</div></div>${controls}<div class="vlog" id="voiceLog">${voiceLogHtml()}</div>`)}
   </div>${res}
   ${hist.length ? `${sectionTitle('Your past sessions')}${list(hist.map(h => listRow({ title: (VOICE_OUTCOME[h.outcome] || [h.status])[0], sub: `${fmt(h.createdAt)} · ${Math.floor(h.durationSec / 60)}:${String(h.durationSec % 60).padStart(2, '0')}${h.summary ? ' · ' + h.summary : ''}` })))}` : ''}`;
@@ -6148,7 +6152,7 @@ const FORMS = {
   'voice-cfg': async form => {
     const cfg = { enabled: form.enabled.checked, budgetKrw: Number(form.budgetKrw.value), blockKrw: Number(form.blockKrw.value), usdKrw: Number(form.usdKrw.value), maxSeconds: Math.round(Number(form.maxMin.value) * 60), allowed: [...form.querySelectorAll('[name=allow]:checked')].map(x => x.value) };
     const saved = await Store.call({ action: 'voice.admin.save', key: DIRECTOR.password, config: cfg });
-    ui.voiceAdmin.config = saved; const m = form.querySelector('[data-saved]'); if (m) m.textContent = '✓ Saved';
+    ui.voiceAdmin.config = saved; Voice.info = null; const m = form.querySelector('[data-saved]'); if (m) m.textContent = '✓ Saved';
   },
   'msg-send': async form => { await sendFromComposer(form, form.dataset.key, $('msgLog')); },
   'grp-create': async form => { const ids = [...form.querySelectorAll('[name=m]:checked')].map(x => x.value); const r = await createGroup(form.name.value, ids); ui.msgNew = null; ui.msgKey = 'room:' + r.id; render(false); },
